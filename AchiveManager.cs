@@ -2,21 +2,19 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class AchiveManager : MonoBehaviour
+public class AchievementManager : MonoBehaviour
 {
-
     public GameObject[] lockCharacter;
     public GameObject[] unlockCharacter;
     public GameObject uiNotice;
     
-
-    enum Achive {UnlockPotato, UnlockBean}
-    Achive[] achives;
+    enum Achievement { UnlockPotato, UnlockBean }
+    Achievement[] achievements;
     WaitForSecondsRealtime wait;
 
     void Awake()
     {
-        achives = (Achive[])Enum.GetValues(typeof(Achive));
+        achievements = (Achievement[])Enum.GetValues(typeof(Achievement));
         wait = new WaitForSecondsRealtime(5);
 
         if (!PlayerPrefs.HasKey("MyData"))
@@ -29,74 +27,69 @@ public class AchiveManager : MonoBehaviour
     {
         PlayerPrefs.SetInt("MyData", 1);
 
-        foreach (Achive achive in achives)
+        foreach (Achievement achievement in achievements)
         {
-            PlayerPrefs.SetInt(achive.ToString(), 0); //업적이 많을 경우 효율적인 방법임
+            PlayerPrefs.SetInt(achievement.ToString(), 0);
         }
-
     }
+
     void Start()
     {
-        UnlockCharactor();
+        UnlockCharacter(); // 오타 수정
     }
 
-
-    void UnlockCharactor()
+    void UnlockCharacter() // 오타 수정
     {
-        for (int index=0; index<lockCharacter.Length; index++)
+        for (int index = 0; index < lockCharacter.Length; index++)
         {
-            string achiveName = achives[index].ToString();
-            bool isUnlock = PlayerPrefs.GetInt(achiveName) == 1;
+            string achievementName = achievements[index].ToString();
+            bool isUnlock = PlayerPrefs.GetInt(achievementName) == 1;
             lockCharacter[index].SetActive(!isUnlock);
             unlockCharacter[index].SetActive(isUnlock);
         }
     }
-    // Update is called once per frame
+
     void LateUpdate()
     {
-        foreach (Achive achive in achives)
+        foreach (Achievement achievement in achievements)
         {
-            CheckAchive(achive);
+            CheckAchievement(achievement);
         }
     }
 
-    void CheckAchive(Achive achive)
+    void CheckAchievement(Achievement achievement) // 오타 수정
     {
-        bool isAchive = false;
+        bool isAchieved = false; // 변수명 개선
 
-        switch (achive)
+        switch (achievement)
         {
-            case Achive.UnlockPotato:
-                isAchive = GameManager.instance.kill >= 10;
+            case Achievement.UnlockPotato:
+                isAchieved = GameManager.instance.kill >= 10;
                 break;
-            case Achive.UnlockBean:
-                isAchive = GameManager.instance.gameTime == GameManager.instance.maxGameTime;
+            case Achievement.UnlockBean:
+                isAchieved = GameManager.instance.gameTime == GameManager.instance.maxGameTime;
                 break;
-
         }
 
-        if(isAchive && PlayerPrefs.GetInt(achive.ToString()) == 0)
+        if (isAchieved && PlayerPrefs.GetInt(achievement.ToString()) == 0)
         {
-            PlayerPrefs.SetInt(achive.ToString(), 1);
+            PlayerPrefs.SetInt(achievement.ToString(), 1);
 
-            for (int index=0; index<uiNotice.transform.childCount; index++)
+            for (int index = 0; index < uiNotice.transform.childCount; index++)
             {
-                bool isActive = index == (int)achive;
+                bool isActive = index == (int)achievement;
                 uiNotice.transform.GetChild(index).gameObject.SetActive(isActive);
             }
 
-            StartCoroutine(NoiceRoutine());
+            StartCoroutine(NoticeRoutine()); // 오타 수정
         }
     }
 
-    IEnumerator NoiceRoutine()
+    IEnumerator NoticeRoutine() // 오타 수정
     {
         uiNotice.SetActive(true);
-
-        AudioManager.Instance.PlaySfx(AudioManager.Sfx.LevelUp);
-
+        AudioManager.instance.PlaySfx(AudioManager.Sfx.LevelUp);
         yield return wait;
         uiNotice.SetActive(false);
     }
-
 }
