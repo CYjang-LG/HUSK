@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class PoolManager : MonoBehaviour
 {
-    // ÇÁ¸®ÆéµéÀ» º¸°üÇÒ º¯¼ö ÇÊ¿ä
+    // í”„ë¦¬í©ë“¤ì„ ë³´ê´€í•  ë³€ìˆ˜ í•„ìš”
     public GameObject[] prefabs;
 
-    // Ç® ´ã´çÀ» ÇÏ´Â ¸®½ºÆ®µé ÇÊ¿ä 
+    // í’€ ë‹´ë‹¹ì„ í•˜ëŠ” ë¦¬ìŠ¤íŠ¸ë“¤ í•„ìš” 
     List<GameObject>[] pools;
 
     void Awake()
@@ -26,9 +26,9 @@ public class PoolManager : MonoBehaviour
     {
         GameObject select = null;
 
-        // ¼±ÅÃÇÑ Ç®ÀÇ ³î°í(ºñÈ°¼º) ÀÖ´Â °ÔÀÓ¿ÀºêÁ§Æ® Á¢±Ù, ¹ß°ßÇÏ¸é select º¯¼ö¿¡ ÇÒ´ç
+        // ì„ íƒí•œ í’€ì˜ ë†€ê³ (ë¹„í™œì„±) ìˆëŠ” ê²Œì„ì˜¤ë¸Œì íŠ¸ ì ‘ê·¼, ë°œê²¬í•˜ë©´ select ë³€ìˆ˜ì— í• ë‹¹
 
-        //foreach ¹è¿­ ¸®½ºÆ®ÀÇ µ¥ÀÌÅÍ¸¦ ¼øÂ÷ÀûÀ¸·Î Á¢±Ù
+        //foreach ë°°ì—´ ë¦¬ìŠ¤íŠ¸ì˜ ë°ì´í„°ë¥¼ ìˆœì°¨ì ìœ¼ë¡œ ì ‘ê·¼
         foreach(GameObject item in pools[index])
         {
             if (!item.activeSelf)
@@ -39,7 +39,7 @@ public class PoolManager : MonoBehaviour
             } 
         }
 
-        //¸ø Ã£¾ÒÀ¸¸é »õ·Ó°Ô »ı¼ºÇÏ°í selectº¯¼ö¿¡ ÇÒ´ç
+        //ëª» ì°¾ì•˜ìœ¼ë©´ ìƒˆë¡­ê²Œ ìƒì„±í•˜ê³  selectë³€ìˆ˜ì— í• ë‹¹
         if (!select)
         {
             select = Instantiate(prefabs[index], transform);
