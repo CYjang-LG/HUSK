@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class AudioManager : MonoBehaviour
@@ -20,7 +19,7 @@ public class AudioManager : MonoBehaviour
     AudioSource[] sfxPlayers;
     int channelIndex;
 
-    public enum Sfx { Dead, Hit, LevelUp = 3, Lose, Melee, Range = 7, Select, Win };
+    public enum Sfx { Dead, Hit, LevelUp = 3, Lose, Melee, Range = 7, Select, Win }
 
     void Awake()
     {
@@ -30,7 +29,7 @@ public class AudioManager : MonoBehaviour
 
     void Init()
     {
-        //배경음 플레이어 초기화
+        // 배경음 플레이어 초기화
         GameObject bgmObject = new GameObject("BgmPlayer"); 
         bgmObject.transform.parent = transform;
         bgmPlayer = bgmObject.AddComponent<AudioSource>();
@@ -40,7 +39,7 @@ public class AudioManager : MonoBehaviour
         bgmPlayer.clip = bgmClip;
         bgmEffect = Camera.main.GetComponent<AudioHighPassFilter>();
 
-        //효과음 플레이어 초기화
+        // 효과음 플레이어 초기화
         GameObject sfxObject = new GameObject("SfxObject");
         sfxObject.transform.parent = transform;
         sfxPlayers = new AudioSource[channels];
@@ -51,7 +50,6 @@ public class AudioManager : MonoBehaviour
             sfxPlayers[index].playOnAwake = false;
             sfxPlayers[index].bypassListenerEffects = true;
             sfxPlayers[index].volume = sfxVolume;
-            
         }
     }
 
@@ -67,7 +65,7 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    public void EffectBgm(bool isPlay)
+    public void EffectBgm(bool isPlay) // 메서드명 일관성 개선
     {
         bgmEffect.enabled = isPlay;
     }
@@ -92,8 +90,5 @@ public class AudioManager : MonoBehaviour
             sfxPlayers[loopIndex].Play();
             break;
         }
-        
     }
-
-
 }
