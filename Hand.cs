@@ -5,31 +5,31 @@ public class Hand : MonoBehaviour
     public bool isLeft;
     public SpriteRenderer spriter;
 
-    // Player °ü·Ã ÄÄÆ÷³ÍÆ® ÂüÁ¶
+    // Player ê´€ë ¨ ì»´í¬ë„ŒíŠ¸ ì°¸ì¡°
     SpriteRenderer playerSprite;
     Scanner scanner;
 
-    // ¿À¸¥¼Õ À§Ä¡ °ª
+    // ì˜¤ë¥¸ì† ìœ„ì¹˜ ê°’
     Vector3 rightPos = new Vector3(0.35f, -0.15f, 0);
     Vector3 rightPosReverse = new Vector3(-0.15f, -0.15f, 0);
-    // ¿Ş¼Õ ±âº» °¢µµ °ª
+    // ì™¼ì† ê¸°ë³¸ ê°ë„ ê°’
     Quaternion leftRot = Quaternion.Euler(0, 0, -35);
     Quaternion leftRotReverse = Quaternion.Euler(0, 0, 35);
 
     void Awake()
     {
-        // ºÎ¸ğ¿¡ ÀÖ´Â Player ÄÄÆ÷³ÍÆ®¸¦ ¸ÕÀú Ã£½À´Ï´Ù.
+        // ë¶€ëª¨ì— ìˆëŠ” Player ì»´í¬ë„ŒíŠ¸ë¥¼ ë¨¼ì € ì°¾ìŠµë‹ˆë‹¤.
         Player player = GetComponentInParent<Player>();
         if (player != null)
         {
-            // Player ÄÄÆ÷³ÍÆ®¸¦ ÅëÇØ ´Ù¸¥ ÄÄÆ÷³ÍÆ®µéÀ» ¾ÈÀüÇÏ°Ô °¡Á®¿É´Ï´Ù.
+            // Player ì»´í¬ë„ŒíŠ¸ë¥¼ í†µí•´ ë‹¤ë¥¸ ì»´í¬ë„ŒíŠ¸ë“¤ì„ ì•ˆì „í•˜ê²Œ ê°€ì ¸ì˜µë‹ˆë‹¤.
             playerSprite = player.GetComponent<SpriteRenderer>();
             scanner = player.scanner;
         }
         else
         {
-            // Player¸¦ Ã£Áö ¸øÇßÀ» °æ¿ì, ¿¡·¯ ·Î±×¸¦ ³²°Ü¼­ ¹®Á¦¸¦ ½±°Ô ÆÄ¾ÇÇÏµµ·Ï ÇÕ´Ï´Ù.
-            Debug.LogError("Hand ½ºÅ©¸³Æ®°¡ ºÎ¸ğ¿¡¼­ Player ÄÄÆ÷³ÍÆ®¸¦ Ã£Áö ¸øÇß½À´Ï´Ù!", gameObject);
+            // Playerë¥¼ ì°¾ì§€ ëª»í–ˆì„ ê²½ìš°, ì—ëŸ¬ ë¡œê·¸ë¥¼ ë‚¨ê²¨ì„œ ë¬¸ì œë¥¼ ì‰½ê²Œ íŒŒì•…í•˜ë„ë¡ í•©ë‹ˆë‹¤.
+            Debug.LogError("Hand ìŠ¤í¬ë¦½íŠ¸ê°€ ë¶€ëª¨ì—ì„œ Player ì»´í¬ë„ŒíŠ¸ë¥¼ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤!", gameObject);
         }
     }
 
@@ -46,39 +46,39 @@ public class Hand : MonoBehaviour
 
     void LateUpdate()
     {
-        // playerSprite°¡ ÇÒ´çµÇÁö ¾Ê¾Ò´Ù¸é ·ÎÁ÷À» ½ÇÇàÇÏÁö ¾Ê½À´Ï´Ù.
+        // playerSpriteê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ë‹¤ë©´ ë¡œì§ì„ ì‹¤í–‰í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.
         if (playerSprite == null) return;
 
         bool isReverse = playerSprite.flipX;
 
-        // isLeft°¡ trueÀÏ ¶§ (ÃÑÀ» µéÁö ¾ÊÀº ¿Ş¼Õ)
+        // isLeftê°€ trueì¼ ë•Œ (ì´ì„ ë“¤ì§€ ì•Šì€ ì™¼ì†)
         if (isLeft)
         {
-            // ¿Ş¼ÕÀº ±âÁ¸Ã³·³ ±âº» ÀÚ¼¼¸¦ À¯ÁöÇÕ´Ï´Ù.
+            // ì™¼ì†ì€ ê¸°ì¡´ì²˜ëŸ¼ ê¸°ë³¸ ìì„¸ë¥¼ ìœ ì§€í•©ë‹ˆë‹¤.
             transform.localRotation = isReverse ? leftRotReverse : leftRot;
             spriter.flipX = isReverse;
             spriter.flipY = false;
             spriter.sortingOrder = isReverse ? 4 : 6;
         }
-        // ¿À¸¥¼Õ ·ÎÁ÷ (ÃÑÀ» µç ¿À¸¥¼Õ)
+        // ì˜¤ë¥¸ì† ë¡œì§ (ì´ì„ ë“  ì˜¤ë¥¸ì†)
         else
         {
-            // ½ºÄ³³Ê°¡ ÀÖ°í, °¡Àå °¡±î¿î Å¸°ÙÀÌ °¨ÁöµÇ¾úÀ» ¶§
+            // ìŠ¤ìºë„ˆê°€ ìˆê³ , ê°€ì¥ ê°€ê¹Œìš´ íƒ€ê²Ÿì´ ê°ì§€ë˜ì—ˆì„ ë•Œ
             if (scanner != null && scanner.nearestTarget != null)
             {
-                // === Á¶ÁØ ·ÎÁ÷ ½ÃÀÛ ===
+                // === ì¡°ì¤€ ë¡œì§ ì‹œì‘ ===
                 Vector3 targetPos = scanner.nearestTarget.position;
                 Vector3 dir = targetPos - transform.position;
                 float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
                 transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-                // === Á¶ÁØ ·ÎÁ÷ ³¡ ===
+                // === ì¡°ì¤€ ë¡œì§ ë ===
 
-                // ÃÑÀÇ °¢µµ¿¡ µû¶ó ½ºÇÁ¶óÀÌÆ®ÀÇ YÃàÀ» µÚÁı¾îÁİ´Ï´Ù.
+                // ì´ì˜ ê°ë„ì— ë”°ë¼ ìŠ¤í”„ë¼ì´íŠ¸ì˜ Yì¶•ì„ ë’¤ì§‘ì–´ì¤ë‹ˆë‹¤.
                 spriter.flipY = Mathf.Abs(angle) > 90f;
-                // È¸ÀüÀ¸·Î ¹æÇâÀ» Á¦¾îÇÏ¹Ç·Î XÃà µÚÁı±â´Â ºñÈ°¼ºÈ­ÇÕ´Ï´Ù.
+                // íšŒì „ìœ¼ë¡œ ë°©í–¥ì„ ì œì–´í•˜ë¯€ë¡œ Xì¶• ë’¤ì§‘ê¸°ëŠ” ë¹„í™œì„±í™”í•©ë‹ˆë‹¤.
                 spriter.flipX = false;
 
-                // ÇÃ·¹ÀÌ¾î ¹æÇâ¿¡ µû¶ó ·»´õ¸µ ¼ø¼­¸¦ Á¶ÀıÇÕ´Ï´Ù.
+                // í”Œë ˆì´ì–´ ë°©í–¥ì— ë”°ë¼ ë Œë”ë§ ìˆœì„œë¥¼ ì¡°ì ˆí•©ë‹ˆë‹¤.
                 spriter.sortingOrder = isReverse ? 6 : 6;
             }
             else
