@@ -9,7 +9,7 @@ public class OrbitWeapon : WeaponBase
 
     void Update()
     {
-        if (!GameManager.Instance.isLive) return;
+        if (!GameManager.instance.isLive) return;
         transform.Rotate(Vector3.back * orbitSpeed * Time.deltaTime);
     }
 
@@ -54,3 +54,4 @@ public class OrbitWeapon : WeaponBase
         }
     }
 }
+
