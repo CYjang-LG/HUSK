@@ -1,52 +1,50 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    // ªı Ω∫≈∏¿œ
-    public static GameManager Instance { get; private set; }
-    // ±∏ Ω∫≈∏¿œ »£»Ø
-    public static GameManager instance;
 
+    public static GameManager instance;
     [Header("# Game Control")]
     public bool isLive;
     public float gameTime;
     public float maxGameTime = 2 * 10f;
-
     [Header("# Player Info")]
     public int playerId;
     public float health;
-    public float maxhealth = 100;
+    public float maxHealth = 100;
     public int level;
     public int kill;
     public int exp;
-    public int[] nextExp = { 3, 5, 10, 100, 150, 210, 280, 360, 450, 600 };
+    public int[] nextExp = { 10, 30, 60, 100, 150, 210, 280, 360, 450, 600 };
 
     [Header("# Game Object")]
-    public PoolManager pool;
     public Player player;
-    public LevelUp uiLevleUp;
+    public PoolManager pool;
+    public LevelUp uiLevelUp;
     public Result uiResult;
     public GameObject enemyCleaner;
 
     void Awake()
     {
-        Instance = this;
-        instance = this; // ±∏πˆ¿¸ »£»Ø
+        instance = this;
     }
 
     public void GameStart(int id)
     {
         playerId = id;
-        health = maxhealth;
+        maxHealth = 100;
+        health = maxHealth;
 
         player.gameObject.SetActive(true);
-        uiLevleUp.Select(playerId % 2);
+        uiLevelUp.Select(playerId % 2);    //ÏûÑÏãú Ïä§ÌÅ¨Î¶ΩÌä∏ (Ï≤´Î≤àÏß∏ Ï∫êÎ¶≠ÌÑ∞ ÏÑ†ÌÉù)
+
         Resume();
 
-        AudioManager.Instance.PlayBGM(true);
-        AudioManager.Instance.PlaySfx(AudioManager.Sfx.Select);
+        AudioManager.instance.PlayBgm(true);
+        AudioManager.instance.PlaySfx(AudioManager.Sfx.Select);
     }
 
     public void GameOver()
@@ -57,18 +55,21 @@ public class GameManager : MonoBehaviour
     IEnumerator GameOverRoutine()
     {
         isLive = false;
+
         yield return new WaitForSeconds(0.5f);
 
         uiResult.gameObject.SetActive(true);
         uiResult.Lose();
         Stop();
 
-        AudioManager.Instance.PlaySfx(AudioManager.Sfx.Lose);
+        AudioManager.instance.PlayBgm(false);
+        AudioManager.instance.PlaySfx(AudioManager.Sfx.Lose);
     }
 
     public void GameVictory()
     {
         StartCoroutine(GameVictoryRoutine());
+
     }
 
     IEnumerator GameVictoryRoutine()
@@ -82,7 +83,8 @@ public class GameManager : MonoBehaviour
         uiResult.Win();
         Stop();
 
-        AudioManager.Instance.PlaySfx(AudioManager.Sfx.Win);
+        AudioManager.instance.PlayBgm(false);
+        AudioManager.instance.PlaySfx(AudioManager.Sfx.Win);
     }
 
     public void GameRetry()
@@ -90,9 +92,11 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(0);
     }
 
+
     void Update()
     {
-        if (!isLive) return;
+        if (!isLive)
+            return;
 
         gameTime += Time.deltaTime;
 
@@ -105,15 +109,15 @@ public class GameManager : MonoBehaviour
 
     public void GetExp()
     {
-        if (!isLive) return;
+        if (!isLive)
+            return ;
 
         exp++;
-
-        if (exp == nextExp[Mathf.Min(level, nextExp.Length - 1)])
+        if (exp == nextExp[Mathf.Min(level,nextExp.Length-1)])
         {
             level++;
             exp = 0;
-            uiLevleUp.show();
+            uiLevelUp.show();
         }
     }
 
@@ -122,10 +126,10 @@ public class GameManager : MonoBehaviour
         isLive = false;
         Time.timeScale = 0;
     }
-
     public void Resume()
     {
         isLive = true;
         Time.timeScale = 1;
     }
+
 }
