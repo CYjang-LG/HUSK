@@ -12,7 +12,8 @@ public class PlayerContactDamageReceiver : MonoBehaviour
 
     void OnCollisionStay2D(Collision2D collision)
     {
-        if (!GameManager.Instance.isLive) return;
+        if (!GameManager.instance.isLive) return;
         health.Damage(dps);
     }
 }
+
