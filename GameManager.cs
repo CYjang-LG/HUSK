@@ -5,12 +5,13 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-
     public static GameManager instance;
+    
     [Header("# Game Control")]
     public bool isLive;
     public float gameTime;
     public float maxGameTime = 2 * 10f;
+    
     [Header("# Player Info")]
     public int playerId;
     public float health;
@@ -39,7 +40,7 @@ public class GameManager : MonoBehaviour
         health = maxHealth;
 
         player.gameObject.SetActive(true);
-        uiLevelUp.Select(playerId % 2);    //임시 스크립트 (첫번째 캐릭터 선택)
+        uiLevelUp.Select(playerId % 2);
 
         Resume();
 
@@ -55,7 +56,6 @@ public class GameManager : MonoBehaviour
     IEnumerator GameOverRoutine()
     {
         isLive = false;
-
         yield return new WaitForSeconds(0.5f);
 
         uiResult.gameObject.SetActive(true);
@@ -69,7 +69,6 @@ public class GameManager : MonoBehaviour
     public void GameVictory()
     {
         StartCoroutine(GameVictoryRoutine());
-
     }
 
     IEnumerator GameVictoryRoutine()
@@ -92,7 +91,6 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(0);
     }
 
-
     void Update()
     {
         if (!isLive)
@@ -110,14 +108,14 @@ public class GameManager : MonoBehaviour
     public void GetExp()
     {
         if (!isLive)
-            return ;
+            return;
 
         exp++;
-        if (exp == nextExp[Mathf.Min(level,nextExp.Length-1)])
+        if (exp == nextExp[Mathf.Min(level, nextExp.Length - 1)])
         {
             level++;
             exp = 0;
-            uiLevelUp.show();
+            uiLevelUp.Show(); // 메서드명 일관성 수정
         }
     }
 
@@ -126,10 +124,10 @@ public class GameManager : MonoBehaviour
         isLive = false;
         Time.timeScale = 0;
     }
+    
     public void Resume()
     {
         isLive = true;
         Time.timeScale = 1;
     }
-
 }
