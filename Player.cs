@@ -7,18 +7,23 @@ public class Player : MonoBehaviour
 {
     public Vector2 inputVec;
     public float speed;
+    public float jumpForce = 10f; // 점프력 추가
     public Scanner scanner;
     public Hand[] hands;
     public RuntimeAnimatorController[] animCon;
+    
+    // 지면 체크 변수 추가
+    public Transform groundCheck;
+    public LayerMask groundLayer;
+    private bool isGrounded;
+    private float groundCheckRadius = 0.2f;
 
-
-    // 필요한 컴포넌트 선언
     Rigidbody2D rigid;
     SpriteRenderer spriter;
     Animator anim;
 
     void Awake()
-    {  // 필요컴포넌트 초기화
+    {
         rigid = GetComponent<Rigidbody2D>();
         spriter = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
@@ -30,37 +35,47 @@ public class Player : MonoBehaviour
     {
         speed *= Character.Speed;
         anim.runtimeAnimatorController = animCon[GameManager.instance.playerId];
+        
+        // 횡스크롤을 위한 중력 설정
+        rigid.gravityScale = 2f;
+        rigid.freezeRotation = true;
     }
 
-    void Shoot()
-    {
-        if (!GameManager.instance.isLive) return;
-        if (scanner == null || scanner.nearestTarget == null) return;
-
-        Vector3 targetPos = scanner.nearestTarget.position;
-        foreach (Hand hand in hands)
-        {
-            if (!hand.isLeft) // 오른손만 총 조준
-            {
-                hand.AimAt(targetPos); // 발사 시점에서 조준
-            }
-        }
-
-    }
-        void FixedUpdate()
+    void Update()
     {
         if (!GameManager.instance.isLive)
             return;
-        Vector2 nextVec = inputVec * speed * Time.fixedDeltaTime; //대각선 이동에서도 거리에 따라 비슷하게 이동하도록
+            
+        // 지면 체크
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        
+        // 점프 입력 처리 (Space 키)
+        if (Input.GetButtonDown("Jump") && isGrounded)
+        {
+            rigid.linearVelocity = new Vector2(rigid.linearVelocity.x, jumpForce);
+            anim.SetTrigger("Jump");
+        }
+        
+        // 낙하 애니메이션
+        anim.SetBool("IsGrounded", isGrounded);
+        anim.SetFloat("VerticalVelocity", rigid.linearVelocity.y);
+    }
 
-
-        //3. 위치이동
-        rigid.MovePosition(rigid.position + nextVec);
+    void FixedUpdate()
+    {
+        if (!GameManager.instance.isLive)
+            return;
+            
+        // 횡스크롤: X축 이동만 처리, Y축은 중력에 맡김
+        Vector2 moveVec = new Vector2(inputVec.x * speed * Time.fixedDeltaTime, 0);
+        rigid.MovePosition(new Vector2(rigid.position.x + moveVec.x, rigid.position.y));
     }
 
     void OnMove(InputValue value)
     {
-        inputVec = value.Get<Vector2>();
+        Vector2 input = value.Get<Vector2>();
+        // 횡스크롤에서는 X축 입력만 사용
+        inputVec = new Vector2(input.x, 0);
     }
 
     void LateUpdate()
@@ -68,10 +83,11 @@ public class Player : MonoBehaviour
         if (!GameManager.instance.isLive)
             return;
 
-        anim.SetFloat("Speed", inputVec.magnitude);
+        anim.SetFloat("Speed", Mathf.Abs(inputVec.x));
 
-        if (inputVec.x != 0){
-            spriter.flipX = inputVec.x < 0;  //because left key is (-)
+        if (inputVec.x != 0)
+        {
+            spriter.flipX = inputVec.x < 0;
         }
     }
 
@@ -80,16 +96,19 @@ public class Player : MonoBehaviour
         if(!GameManager.instance.isLive)
             return;
 
-        GameManager.instance.health -= Time.deltaTime * 10;
-
-        if(GameManager.instance.health <0)
+        if(collision.gameObject.CompareTag("Enemy"))
         {
-            for(int index = 2; index<transform.childCount; index++)
+            GameManager.instance.health -= Time.deltaTime * 10;
+
+            if(GameManager.instance.health < 0)
             {
-                transform.GetChild(index).gameObject.SetActive(false);
+                for(int index = 2; index < transform.childCount; index++)
+                {
+                    transform.GetChild(index).gameObject.SetActive(false);
+                }
+                anim.SetTrigger("Dead");
+                GameManager.instance.GameOver();
             }
-            anim.SetTrigger("Dead");
-            GameManager.instance.GameOver();
         }
     }
 }
