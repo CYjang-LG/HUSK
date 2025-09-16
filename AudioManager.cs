@@ -1,14 +1,11 @@
+using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
-    public static AudioManager Instance;
-
-    // ±∏πˆ¿¸ »£»Ø: ±‚¡∏ ƒ⁄µÂø°º≠ Audiomanager.Instance∑Œ ¡¢±Ÿ ∞°¥…
-    public static AudioManager Audiomanager => Instance;
-
-    // Sfx enum
-    public enum Sfx { Dead, Hit, LevelUp = 3, Lose, Melee, Range = 7, Select, Win }
+    public static AudioManager instance;
 
     [Header("#BGM")]
     public AudioClip bgmClip;
@@ -20,18 +17,21 @@ public class AudioManager : MonoBehaviour
     public AudioClip[] sfxClips;
     public float sfxVolume;
     public int channels;
-    AudioSource[] sfxPlayer;
+    AudioSource[] sfxPlayers;
     int channelIndex;
+
+    public enum Sfx { Dead, Hit, LevelUp = 3, Lose, Melee, Range = 7, Select, Win };
 
     void Awake()
     {
-        Instance = this;
+        instance = this;
         Init();
     }
 
     void Init()
     {
-        GameObject bgmObject = new GameObject("BgmPlayer");
+        //Î∞∞Í≤ΩÏùå ÌîåÎ†àÏù¥Ïñ¥ Ï¥àÍ∏∞Ìôî
+        GameObject bgmObject = new GameObject("BgmPlayer"); 
         bgmObject.transform.parent = transform;
         bgmPlayer = bgmObject.AddComponent<AudioSource>();
         bgmPlayer.playOnAwake = false;
@@ -40,45 +40,60 @@ public class AudioManager : MonoBehaviour
         bgmPlayer.clip = bgmClip;
         bgmEffect = Camera.main.GetComponent<AudioHighPassFilter>();
 
-        GameObject sfxObject = new GameObject("SfxPlayer");
+        //Ìö®Í≥ºÏùå ÌîåÎ†àÏù¥Ïñ¥ Ï¥àÍ∏∞Ìôî
+        GameObject sfxObject = new GameObject("SfxObject");
         sfxObject.transform.parent = transform;
-        sfxPlayer = new AudioSource[channels];
+        sfxPlayers = new AudioSource[channels];
 
-        for (int i = 0; i < sfxPlayer.Length; i++)
+        for(int index = 0; index < sfxPlayers.Length; index++)
         {
-            sfxPlayer[i] = sfxObject.AddComponent<AudioSource>();
-            sfxPlayer[i].playOnAwake = false;
-            sfxPlayer[i].bypassListenerEffects = true;
-            sfxPlayer[i].volume = sfxVolume;
+            sfxPlayers[index] = sfxObject.AddComponent<AudioSource>();
+            sfxPlayers[index].playOnAwake = false;
+            sfxPlayers[index].bypassListenerEffects = true;
+            sfxPlayers[index].volume = sfxVolume;
+            
         }
     }
 
-    public void PlayBGM(bool isPlay)
+    public void PlayBgm(bool isPlay)
     {
-        if (isPlay) bgmPlayer.Play();
-        else bgmPlayer.Stop();
+        if (isPlay)
+        {
+            bgmPlayer.Play();
+        }
+        else
+        {
+            bgmPlayer.Stop();
+        }
     }
 
-    public void EffectBGM(bool isPlay)
+    public void EffectBgm(bool isPlay)
     {
         bgmEffect.enabled = isPlay;
     }
 
     public void PlaySfx(Sfx sfx)
     {
-        for (int i = 0; i < sfxPlayer.Length; i++)
+        for(int index = 0; index < sfxPlayers.Length; index++)
         {
-            int loopIndex = (i + channelIndex) % sfxPlayer.Length;
-            if (sfxPlayer[loopIndex].isPlaying) continue;
+            int loopIndex = (index + channelIndex) % sfxPlayers.Length;
+
+            if (sfxPlayers[loopIndex].isPlaying)
+                continue;
 
             int ranIndex = 0;
             if (sfx == Sfx.Hit || sfx == Sfx.Melee)
+            {
                 ranIndex = Random.Range(0, 2);
+            }
 
             channelIndex = loopIndex;
-            sfxPlayer[loopIndex].clip = sfxClips[(int)sfx + ranIndex];
-            sfxPlayer[loopIndex].Play();
+            sfxPlayers[loopIndex].clip = sfxClips[(int)sfx + ranIndex];
+            sfxPlayers[loopIndex].Play();
             break;
         }
+        
     }
+
+
 }
