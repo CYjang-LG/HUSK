@@ -38,7 +38,7 @@ public class Gear : MonoBehaviour
     }
     void RateUp()
     {
-        Weapon[] weapons = transform.parent.GetComponentsInChildren<Weapon>();
+        WeaponBase[] weapons = transform.parent.GetComponentsInChildren<WeaponBase>();
         foreach (Weapon weapon in weapons)
         {
             switch (weapon.id)
@@ -61,3 +61,4 @@ public class Gear : MonoBehaviour
         GameManager.instance.player.speed = speed + speed * rate;
     }
 }
+
