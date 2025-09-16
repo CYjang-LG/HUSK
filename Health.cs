@@ -19,13 +19,14 @@ public class Health : MonoBehaviour
 
     public void Damage(float amountPerSec)
     {
-        if (!GameManager.Instance.isLive) return;
+        if (!GameManager.instance.isLive) return;
 
         cur = Mathf.Max(0f, cur - amountPerSec * Time.deltaTime);
         OnHealthChanged?.Invoke(cur);
 
-        if (cur <= 0f) GameManager.Instance.GameOver();
+        if (cur <= 0f) GameManager.instance.GameOver();
     }
 
     public float Get() => cur;
 }
+
