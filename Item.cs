@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-
 public class Item : MonoBehaviour
 {
     public ItemData data;
@@ -9,44 +8,43 @@ public class Item : MonoBehaviour
     public Weapon weapon;
     public Gear gear;
     
-
     Image icon;
-    Text textlevel;
+    Text textLevel;
     Text textName;
     Text textDesc;
 
     void Awake()
     {
-        icon = GetComponentsInChildren<Image>()[1]; // [1]은 자기 자신에 포함된 삽그림까지 포함
+        icon = GetComponentsInChildren<Image>()[1];
         icon.sprite = data.itemIcon;
 
         Text[] texts = GetComponentsInChildren<Text>();
-        textlevel = texts[0];
+        textLevel = texts[0];
         textName = texts[1];
         textDesc = texts[2];
         textName.text = data.itemName;
-
     }
 
     void OnEnable()
     {
-        textlevel.text = "Lv." + (level + 1);
+        textLevel.text = "Lv." + (level + 1);
 
         switch (data.itemType)
         {
             case ItemData.ItemType.Melee:
             case ItemData.ItemType.Range:
-                textDesc.text = string.Format(data.itemDesc, data.damages[level]*100, data.counts[level]);
+                textDesc.text = string.Format(data.itemDesc, data.damages[level] * 100, data.counts[level]);
                 break;
             case ItemData.ItemType.Glove:
             case ItemData.ItemType.Shoe:
-                textDesc.text = string.Format(data.itemDesc, data.damages[level]*100);
+                textDesc.text = string.Format(data.itemDesc, data.damages[level] * 100);
                 break;
             default:
                 textDesc.text = string.Format(data.itemDesc);
                 break;
         }
     }
+
     public void OnClick()
     {
         switch (data.itemType)
@@ -71,6 +69,7 @@ public class Item : MonoBehaviour
                 }
                 level++;
                 break;
+                
             case ItemData.ItemType.Glove:
             case ItemData.ItemType.Shoe:
                 if (level == 0)
@@ -84,16 +83,13 @@ public class Item : MonoBehaviour
                     float nextRate = data.damages[level];
                     gear.LevelUp(nextRate);
                 }
-
                 level++;
                 break;
+                
             case ItemData.ItemType.Heal:
-                GameManager.instance.health = GameManager.instance.maxhealth;
+                GameManager.instance.health = GameManager.instance.maxHealth; // 오타 수정
                 break;
-
-
         }
-
 
         if(level == data.damages.Length)
         {
