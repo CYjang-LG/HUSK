@@ -3,42 +3,65 @@ using UnityEngine.UI;
 
 public class Item : MonoBehaviour
 {
+    [Header("Item Data")]
     public ItemData data;
+
+    [Header("Level")]
     public int level;
-    public Weapon weapon;
+
+    [Header("References")]
+    public WeaponBase weaponBase;
     public Gear gear;
-    
-    Image icon;
-    Text textLevel;
-    Text textName;
-    Text textDesc;
+
+    // UI 참조
+    private Image icon;
+    private Text textLevel;
+    private Text textName;
+    private Text textDesc;
+
+    private Player player;
 
     void Awake()
     {
-        icon = GetComponentsInChildren<Image>()[1];
+        // UI 컴포넌트 캐싱
+        var images = GetComponentsInChildren<Image>(true);
+        icon = images.Length > 1 ? images[1] : null;
         icon.sprite = data.itemIcon;
 
-        Text[] texts = GetComponentsInChildren<Text>();
-        textLevel = texts[0];
-        textName = texts[1];
-        textDesc = texts[2];
+        var texts = GetComponentsInChildren<Text>(true);
+        if (texts.Length >= 3)
+        {
+            textLevel = texts[0];
+            textName  = texts[1];
+            textDesc  = texts[2];
+        }
         textName.text = data.itemName;
+
+        // 플레이어 참조
+        player = GameManager.instance.player;
     }
 
     void OnEnable()
     {
-        textLevel.text = "Lv." + (level + 1);
+        // 레벨 표시
+        textLevel.text = $"Lv.{level + 1}";
 
+        // 설명 업데이트
         switch (data.itemType)
         {
             case ItemData.ItemType.Melee:
             case ItemData.ItemType.Range:
-                textDesc.text = string.Format(data.itemDesc, data.damages[level] * 100, data.counts[level]);
+                float dmgPercent = data.damages[level] * 100f;
+                int cnt = data.counts[level];
+                textDesc.text = string.Format(data.itemDesc, dmgPercent, cnt);
                 break;
+
             case ItemData.ItemType.Glove:
             case ItemData.ItemType.Shoe:
-                textDesc.text = string.Format(data.itemDesc, data.damages[level] * 100);
+                float ratePercent = data.damages[level] * 100f;
+                textDesc.text = string.Format(data.itemDesc, ratePercent);
                 break;
+
             default:
                 textDesc.text = string.Format(data.itemDesc);
                 break;
@@ -47,53 +70,48 @@ public class Item : MonoBehaviour
 
     public void OnClick()
     {
-        switch (data.itemType)
+        // 이미 회복 아이템이라면 즉시 전체 체력 회복
+        if (data.itemType == ItemData.ItemType.Heal)
         {
-            case ItemData.ItemType.Melee:
-            case ItemData.ItemType.Range:
-                if (level == 0)
-                {
-                    GameObject newWeapon = new GameObject();
-                    weapon = newWeapon.AddComponent<Weapon>();
-                    weapon.Init(data);
-                }
-                else
-                {
-                    float nextDamage = data.baseDamage;
-                    int nextCount = 0;
-
-                    nextDamage += data.baseDamage * data.damages[level];
-                    nextCount += data.counts[level];
-
-                    weapon.LevelUp(nextDamage, nextCount);
-                }
-                level++;
-                break;
-                
-            case ItemData.ItemType.Glove:
-            case ItemData.ItemType.Shoe:
-                if (level == 0)
-                {
-                    GameObject newGear = new GameObject();
-                    gear = newGear.AddComponent<Gear>();
-                    gear.Init(data);
-                }
-                else
-                {
-                    float nextRate = data.damages[level];
-                    gear.LevelUp(nextRate);
-                }
-                level++;
-                break;
-                
-            case ItemData.ItemType.Heal:
-                GameManager.instance.health = GameManager.instance.maxHealth; // 오타 수정
-                break;
+            GameManager.instance.health = GameManager.instance.maxHealth;
+            return;
         }
 
-        if(level == data.damages.Length)
+        // Gear 또는 Weapon 생성 또는 레벨업
+        if (data.itemType == ItemData.ItemType.Glove || data.itemType == ItemData.ItemType.Shoe)
         {
-            GetComponent<Button>().interactable = false;
+            if (level == 0)
+            {
+                // Gear 생성
+                gear = new GameObject($"Gear_{data.itemId}")
+                    .AddComponent<Gear>();
+                gear.Init(data);
+            }
+            else
+            {
+                gear.LevelUp(data.damages[level]);
+            }
         }
+        else
+        {
+            if (level == 0)
+            {
+                // WeaponBase 생성 (팩토리 없이 직접 호출 예시)
+                weaponBase = WeaponFactory.CreateWeapon(
+                    data,
+                    GameManager.instance.pool,
+                    player.scanner,
+                    player.transform
+                );
+            }
+            else
+            {
+                float nextDamage = data.baseDamage * data.damages[level];
+                int nextCount   = data.counts[level];
+                weaponBase.LevelUp(nextDamage, nextCount);
+            }
+        }
+
+        level++;
     }
 }
