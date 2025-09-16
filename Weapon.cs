@@ -13,12 +13,12 @@ public class Weapon : MonoBehaviour
 
     void Awake()
     {
-        player = GameManager.Instance.player;
+        player = GameManager.instance.player;
     }
 
     void Update()
     {
-        if (!GameManager.Instance.isLive)
+        if (!GameManager.instance.isLive)
             return;
 
         switch (id)
@@ -139,3 +139,4 @@ public class Weapon : MonoBehaviour
         AudioManager.Instance.PlaySfx(AudioManager.Sfx.Range);
     }
 }
+
