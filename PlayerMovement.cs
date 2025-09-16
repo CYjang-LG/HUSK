@@ -17,9 +17,10 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!GameManager.Instance.isLive) return;
+        if (!GameManager.instance.isLive) return;
         rb.MovePosition(rb.position + inputVec * baseSpeed * speedMul * Time.fixedDeltaTime);
     }
 
     void OnMove(InputValue value) => inputVec = value.Get<Vector2>();
 }
+
