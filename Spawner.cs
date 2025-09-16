@@ -40,7 +40,7 @@ public class Spawner : MonoBehaviour
     }
 }
 
-//Á÷·ÄÈ­
+//ÃÃ·Â·Ã„ÃˆÂ­
 [System.Serializable]
 public class SpawnData
 {
