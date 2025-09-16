@@ -136,8 +136,9 @@ public class Weapon : MonoBehaviour
         // speed 인자 추가
         bullet.GetComponent<Bullet>().Init(damage, count, dir, speed);
 
-        AudioManager.Instance.PlaySfx(AudioManager.Sfx.Range);
+        AudioManager.instance.PlaySfx(AudioManager.Sfx.Range);
     }
 }
+
 
 
