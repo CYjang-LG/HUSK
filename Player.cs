@@ -12,13 +12,13 @@ public class Player : MonoBehaviour
     public RuntimeAnimatorController[] animCon;
 
 
-    // ÇÊ¿äÇÑ ÄÄÆ÷³ÍÆ® ¼±¾ğ
+    // í•„ìš”í•œ ì»´í¬ë„ŒíŠ¸ ì„ ì–¸
     Rigidbody2D rigid;
     SpriteRenderer spriter;
     Animator anim;
 
     void Awake()
-    {  // ÇÊ¿äÄÄÆ÷³ÍÆ® ÃÊ±âÈ­
+    {  // í•„ìš”ì»´í¬ë„ŒíŠ¸ ì´ˆê¸°í™”
         rigid = GetComponent<Rigidbody2D>();
         spriter = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
@@ -40,9 +40,9 @@ public class Player : MonoBehaviour
         Vector3 targetPos = scanner.nearestTarget.position;
         foreach (Hand hand in hands)
         {
-            if (!hand.isLeft) // ¿À¸¥¼Õ¸¸ ÃÑ Á¶ÁØ
+            if (!hand.isLeft) // ì˜¤ë¥¸ì†ë§Œ ì´ ì¡°ì¤€
             {
-                hand.AimAt(targetPos); // ¹ß»ç ½ÃÁ¡¿¡¼­ Á¶ÁØ
+                hand.AimAt(targetPos); // ë°œì‚¬ ì‹œì ì—ì„œ ì¡°ì¤€
             }
         }
 
@@ -51,10 +51,10 @@ public class Player : MonoBehaviour
     {
         if (!GameManager.instance.isLive)
             return;
-        Vector2 nextVec = inputVec * speed * Time.fixedDeltaTime; //´ë°¢¼± ÀÌµ¿¿¡¼­µµ °Å¸®¿¡ µû¶ó ºñ½ÁÇÏ°Ô ÀÌµ¿ÇÏµµ·Ï
+        Vector2 nextVec = inputVec * speed * Time.fixedDeltaTime; //ëŒ€ê°ì„  ì´ë™ì—ì„œë„ ê±°ë¦¬ì— ë”°ë¼ ë¹„ìŠ·í•˜ê²Œ ì´ë™í•˜ë„ë¡
 
 
-        //3. À§Ä¡ÀÌµ¿
+        //3. ìœ„ì¹˜ì´ë™
         rigid.MovePosition(rigid.position + nextVec);
     }
 
