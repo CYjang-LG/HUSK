@@ -64,9 +64,9 @@ public class Weapon : MonoBehaviour
         count = data.baseCount + Character.Count;
 
         // 풀에서 프리팹 ID 찾기
-        for (int index = 0; index < GameManager.Instance.pool.prefabs.Length; index++)
+        for (int index = 0; index < GameManager.instance.pool.prefabs.Length; index++)
         {
-            if (data.projectile == GameManager.Instance.pool.prefabs[index])
+            if (data.projectile == GameManager.instance.pool.prefabs[index])
             {
                 prefabId = index;
                 break;
@@ -105,7 +105,7 @@ public class Weapon : MonoBehaviour
             }
             else
             {
-                bullet = GameManager.Instance.pool.Get(prefabId).transform;
+                bullet = GameManager.instance.pool.Get(prefabId).transform;
                 bullet.parent = transform;
             }
 
@@ -129,7 +129,7 @@ public class Weapon : MonoBehaviour
         Vector3 targetPos = player.scanner.nearestTarget.position;
         Vector3 dir = (targetPos - transform.position).normalized;
 
-        Transform bullet = GameManager.Instance.pool.Get(prefabId).transform;
+        Transform bullet = GameManager.instance.pool.Get(prefabId).transform;
         bullet.position = transform.position;
         bullet.rotation = Quaternion.FromToRotation(Vector3.up, dir);
 
@@ -139,4 +139,5 @@ public class Weapon : MonoBehaviour
         AudioManager.Instance.PlaySfx(AudioManager.Sfx.Range);
     }
 }
+
 
