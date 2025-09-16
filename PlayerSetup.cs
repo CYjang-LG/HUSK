@@ -22,7 +22,7 @@ public class PlayerSetup : MonoBehaviour
     void OnEnable()
     {
         // GameManager의 playerId 기반 선택
-        int id = GameManager.Instance.playerId;
+        int id = GameManager.instance.playerId;
         id = Mathf.Clamp(id, 0, profiles.Length - 1);
         SelectedProfile = profiles[id];
 
@@ -36,3 +36,4 @@ public class PlayerSetup : MonoBehaviour
         // ex) GetComponent<Animator>().runtimeAnimatorController = ...
     }
 }
+
