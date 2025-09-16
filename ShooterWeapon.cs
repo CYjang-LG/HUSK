@@ -44,7 +44,8 @@ public class ShooterWeapon : WeaponBase
         var b = bulletTf.GetComponent<Bullet>();
         b.Init(damage, count, dir, 15f);
 
-        AudioManager.Instance.PlaySfx(AudioManager.Sfx.Range);
+        AudioManager.instance.PlaySfx(AudioManager.Sfx.Range);
     }
 }
+
 
