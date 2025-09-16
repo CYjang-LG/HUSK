@@ -7,7 +7,7 @@ public class ShooterWeapon : WeaponBase
 
     void Update()
     {
-        if (!GameManager.Instance.isLive) return;
+        if (!GameManager.instance.isLive) return;
 
         timer += Time.deltaTime;
         if (timer >= fireInterval)
@@ -47,3 +47,4 @@ public class ShooterWeapon : WeaponBase
         AudioManager.Instance.PlaySfx(AudioManager.Sfx.Range);
     }
 }
+
