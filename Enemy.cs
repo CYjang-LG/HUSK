@@ -54,7 +54,7 @@ public class Enemy : MonoBehaviour
         isLive = true;
         coll.enabled = true;
         rigid.simulated = true;
-        spriter.sortingOrder = 2; //¸ó½ºÅÍÀÇ ·¹ÀÌ¾î°¡ ±âÁ¸ 2¶ó´Â °¡Á¤ÀÓ
+        spriter.sortingOrder = 2; //ëª¬ìŠ¤í„°ì˜ ë ˆì´ì–´ê°€ ê¸°ì¡´ 2ë¼ëŠ” ê°€ì •ì„
         anim.SetBool("Dead", false);
         health = maxHealth;
     }
@@ -85,20 +85,20 @@ public class Enemy : MonoBehaviour
             isLive = false;
             coll.enabled = false;
             rigid.simulated = false;
-            spriter.sortingOrder = 1; //¸ó½ºÅÍÀÇ ·¹ÀÌ¾î°¡ ±âÁ¸ 2¶ó´Â °¡Á¤ÀÓ
+            spriter.sortingOrder = 1; //ëª¬ìŠ¤í„°ì˜ ë ˆì´ì–´ê°€ ê¸°ì¡´ 2ë¼ëŠ” ê°€ì •ì„
             anim.SetBool("Dead", true);
             GameManager.instance.kill++;
             GameManager.instance.GetExp();
 
-            if(GameManager.instance.isLive)   //if¹® ¾È¿¡ ·ÎÁ÷ÀÌ ÇÑÁÙÀÌ¶ó¸é {}Áß°ıÈ£ »ı·« °¡´É
+            if(GameManager.instance.isLive)   //ifë¬¸ ì•ˆì— ë¡œì§ì´ í•œì¤„ì´ë¼ë©´ {}ì¤‘ê´„í˜¸ ìƒëµ ê°€ëŠ¥
                 AudioManager.Instance.PlaySfx(AudioManager.Sfx.Dead);
         }
     }
 
-    //coroutine ºñµ¿±â ÇÔ¼ö
-    IEnumerator Knockback()// ÄÚ·çÆ¾ÀÇ ¹İÈ¯Çü ÀÎÅÍÆäÀÌ½º
+    //coroutine ë¹„ë™ê¸° í•¨ìˆ˜
+    IEnumerator Knockback()// ì½”ë£¨í‹´ì˜ ë°˜í™˜í˜• ì¸í„°í˜ì´ìŠ¤
     {
-        yield return wait; // ´ÙÀ½ ÇÏ³ªÀÇ ¹°¸®ÇÁ·¹ÀÓ µô·¹ÀÌ ÁÖ±â
+        yield return wait; // ë‹¤ìŒ í•˜ë‚˜ì˜ ë¬¼ë¦¬í”„ë ˆì„ ë”œë ˆì´ ì£¼ê¸°
         Vector3 playerPos = GameManager.instance.player.transform.position;
         Vector3 dirVec = transform.position - playerPos;
         rigid.AddForce(dirVec.normalized * 3, ForceMode2D.Impulse);
