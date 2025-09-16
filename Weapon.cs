@@ -24,12 +24,12 @@ public class Weapon : MonoBehaviour
         switch (id)
         {
             case 0:
-                // È¸ÀüÇü ¹«±â
+                // íšŒì „í˜• ë¬´ê¸°
                 transform.Rotate(Vector3.back * speed * Time.deltaTime);
                 break;
 
             default:
-                // ¹ß»çÇü ¹«±â
+                // ë°œì‚¬í˜• ë¬´ê¸°
                 timer += Time.deltaTime;
                 if (timer > speed)
                 {
@@ -53,17 +53,17 @@ public class Weapon : MonoBehaviour
 
     public void Init(ItemData data)
     {
-        // ±âº» ¼¼ÆÃ
+        // ê¸°ë³¸ ì„¸íŒ…
         name = "Weapon" + data.itemId;
         transform.parent = player.transform;
         transform.localPosition = Vector3.zero;
 
-        // ¼Ó¼º ¼¼ÆÃ
+        // ì†ì„± ì„¸íŒ…
         id = data.itemId;
         damage = data.baseDamage * Character.Damage;
         count = data.baseCount + Character.Count;
 
-        // Ç®¿¡¼­ ÇÁ¸®ÆÕ ID Ã£±â
+        // í’€ì—ì„œ í”„ë¦¬íŒ¹ ID ì°¾ê¸°
         for (int index = 0; index < GameManager.Instance.pool.prefabs.Length; index++)
         {
             if (data.projectile == GameManager.Instance.pool.prefabs[index])
@@ -73,7 +73,7 @@ public class Weapon : MonoBehaviour
             }
         }
 
-        // ¹«±â Å¸ÀÔº° ¼Óµµ ¼³Á¤
+        // ë¬´ê¸° íƒ€ì…ë³„ ì†ë„ ì„¤ì •
         switch (id)
         {
             case 0:
@@ -85,7 +85,7 @@ public class Weapon : MonoBehaviour
                 break;
         }
 
-        // ¼Õ¿¡ ¹«±â ½ºÇÁ¶óÀÌÆ® Àû¿ë
+        // ì†ì— ë¬´ê¸° ìŠ¤í”„ë¼ì´íŠ¸ ì ìš©
         Hand hand = player.hands[(int)data.itemType];
         hand.spriter.sprite = data.handSprite;
         hand.gameObject.SetActive(true);
@@ -116,7 +116,7 @@ public class Weapon : MonoBehaviour
             bullet.Rotate(rotVec);
             bullet.Translate(bullet.up * 1.5f, Space.World);
 
-            // speed ÀÎÀÚ Ãß°¡
+            // speed ì¸ì ì¶”ê°€
             bullet.GetComponent<Bullet>().Init(damage, -100, Vector3.zero, speed);
         }
     }
@@ -133,7 +133,7 @@ public class Weapon : MonoBehaviour
         bullet.position = transform.position;
         bullet.rotation = Quaternion.FromToRotation(Vector3.up, dir);
 
-        // speed ÀÎÀÚ Ãß°¡
+        // speed ì¸ì ì¶”ê°€
         bullet.GetComponent<Bullet>().Init(damage, count, dir, speed);
 
         AudioManager.Instance.PlaySfx(AudioManager.Sfx.Range);
