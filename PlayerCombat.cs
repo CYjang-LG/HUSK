@@ -39,7 +39,7 @@ public class PlayerCombat : MonoBehaviour
         }
         catch (System.Exception)
         {
-            return false; // Input System Ãæµ¹ ½Ã ÀÓ½Ã Ã³¸®
+            return false; // Input System ì¶©ëŒ ì‹œ ì„ì‹œ ì²˜ë¦¬
         }
 #else
     return joystick != null && joystick.IsFiring;
@@ -66,20 +66,20 @@ public class PlayerCombat : MonoBehaviour
         return baseFireRate / fireRateMultiplier;
     }
 
-    // ¿ÜºÎ¿¡¼­ °ø°İ·Â ¹è¼ö ¼³Á¤
+    // ì™¸ë¶€ì—ì„œ ê³µê²©ë ¥ ë°°ìˆ˜ ì„¤ì •
     public void SetDamageMultiplier(float multiplier)
     {
         damageMultiplier = multiplier;
     }
 
-    // ¿ÜºÎ¿¡¼­ ±Ëµµ ¹«±â ¼Óµµ ¹è¼ö ¼³Á¤
+    // ì™¸ë¶€ì—ì„œ ê¶¤ë„ ë¬´ê¸° ì†ë„ ë°°ìˆ˜ ì„¤ì •
     public void SetOrbitSpeedMultiplier(float multiplier)
     {
         orbitSpeedMultiplier = multiplier;
-        // orbitBaseSpeed¿¡ °öÇØ¼­ ±Ëµµ ¹«±â µ¿ÀÛ¿¡ ¹İ¿µÇÏ´Â ·ÎÁ÷ ÇÊ¿ä
+        // orbitBaseSpeedì— ê³±í•´ì„œ ê¶¤ë„ ë¬´ê¸° ë™ì‘ì— ë°˜ì˜í•˜ëŠ” ë¡œì§ í•„ìš”
     }
 
-    // ¿ÜºÎ¿¡¼­ ¹ß»ç °£°İ ¹è¼ö ¼³Á¤ (³ôÀ»¼ö·Ï ºü¸§)
+    // ì™¸ë¶€ì—ì„œ ë°œì‚¬ ê°„ê²© ë°°ìˆ˜ ì„¤ì • (ë†’ì„ìˆ˜ë¡ ë¹ ë¦„)
     public void SetFireIntervalMultiplier(float multiplier)
     {
         fireRateMultiplier = multiplier;
