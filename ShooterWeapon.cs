@@ -1,8 +1,14 @@
-// ShooterWeapon.cs
 using UnityEngine;
 
 public class ShooterWeapon : WeaponBase
 {
+    private float _speed = 0.5f;
+    public override float Speed
+    {
+        get => _speed;
+        set => _speed = value;
+    }
+
     private float timer;
 
     void Update()
@@ -20,7 +26,7 @@ public class ShooterWeapon : WeaponBase
     public override void Init(ItemData data, PoolManager pool, int prefabId, Scanner scanner, float damageMul, int extraCount)
     {
         base.Init(data, pool, prefabId, scanner, damageMul, extraCount);
-        // fireInterval은 캐릭터/장비 배수에서 ApplyRateMultipliers로 조정
+        _speed = 0.5f; // 기본값, 필요시 Gear 등에서 변경
     }
 
     public override void LevelUp(float nextDamage, int addCount)
@@ -31,7 +37,7 @@ public class ShooterWeapon : WeaponBase
 
     private void Fire()
     {
-        if (!scanner || !scanner.nearestTarget) return;
+        if (scanner == null || scanner.nearestTarget == null) return;
 
         Vector3 targetPos = scanner.nearestTarget.position;
         Vector3 dir = (targetPos - transform.position).normalized;
@@ -46,6 +52,10 @@ public class ShooterWeapon : WeaponBase
 
         AudioManager.instance.PlaySfx(AudioManager.Sfx.Range);
     }
+
+    public override void ApplyRateMultipliers(float orbitSpeedMul, float fireIntervalMul)
+    {
+        base.ApplyRateMultipliers(orbitSpeedMul, fireIntervalMul);
+        _speed = 0.5f * fireIntervalMul;
+    }
 }
-
-

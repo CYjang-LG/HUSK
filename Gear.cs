@@ -7,58 +7,54 @@ public class Gear : MonoBehaviour
 
     public void Init(ItemData data)
     {
-        //Basic Set
         name = "Gear" + data.itemId;
         transform.parent = GameManager.instance.player.transform;
         transform.localPosition = Vector3.zero;
 
-        //Property Set
         type = data.itemType;
         rate = data.damages[0];
         ApplyGear();
     }
 
-    public void LevelUp(float rate)
+    public void LevelUp(float newRate)
     {
-        this.rate = rate;
+        rate = newRate;
         ApplyGear();
     }
 
+    /// <summary>
+    /// 적용 대상 무기들에 변경된 속성 적용
+    /// </summary>
     void ApplyGear()
     {
+        var weapons = transform.parent.GetComponentsInChildren<WeaponBase>();
+
         switch (type)
         {
             case ItemData.ItemType.Glove:
-                RateUp();
+                foreach (var weapon in weapons)
+                {
+                    // 회전형/발사형 모두 대응
+                    if (weapon is OrbitWeapon) // 근접 = 회전형
+                    {
+                        weapon.Speed = 150f + (150f * rate);
+                    }
+                    else if (weapon is ShooterWeapon) // 원거리
+                    {
+                        weapon.Speed = 0.5f * (1f - rate);
+                    }
+                }
                 break;
             case ItemData.ItemType.Shoe:
-                SpeedUp();
+                // 플레이어 이동 속도 조정
+                var playerComp = GameManager.instance.player;
+                if (playerComp != null)
+                {
+                    playerComp.speed = 3f + 3f * rate;
+                }
+                break;
+            default:
                 break;
         }
     }
-    void RateUp()
-    {
-        WeaponBase[] weapons = transform.parent.GetComponentsInChildren<WeaponBase>();
-        foreach (Weapon weapon in weapons)
-        {
-            switch (weapon.id)
-            {
-                case 0:
-                    float speed = 150 * Character.WeaponSpeed;
-                    weapon.speed = 150 + (150 * rate);
-                    break;
-                default:
-                    speed = 0.5f * Character.WeaponRate;
-                    weapon.speed = 0.5f * (1f - rate);
-                    break;
-            }
-        }
-    }
-
-    void SpeedUp()
-    {
-        float speed = 3 * Character.Speed;
-        GameManager.instance.player.speed = speed + speed * rate;
-    }
 }
-

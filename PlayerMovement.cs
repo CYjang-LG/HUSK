@@ -1,26 +1,99 @@
-// PlayerMovement.cs
 using UnityEngine;
-using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Rigidbody2D))]
 public class PlayerMovement : MonoBehaviour
 {
-    [Min(0f)] public float baseSpeed = 3f;
-    private float speedMul = 1f;
-
-    private Vector2 inputVec;
     private Rigidbody2D rb;
+    private VirtualJoystick joystick;
 
-    void Awake() => rb = GetComponent<Rigidbody2D>();
+    [Header("이동 설정")]
+    public float moveSpeed = 5f;
 
-    public void SetSpeedMultiplier(float mul) => speedMul = Mathf.Max(0f, mul);
+    [Header("점프 설정")]
+    public float jumpForce = 12f;
+    public LayerMask groundLayerMask = 1; // Ground 레이어 설정
+    public Transform groundCheck; // 발밑 체크 포인트
+    public float groundCheckRadius = 0.2f;
 
-    void FixedUpdate()
+    private bool isGrounded;
+    private float speedMultiplier = 1f;
+
+    void Awake()
     {
-        if (!GameManager.instance.isLive) return;
-        rb.MovePosition(rb.position + inputVec * baseSpeed * speedMul * Time.fixedDeltaTime);
+        rb = GetComponent<Rigidbody2D>();
+        joystick = Object.FindFirstObjectByType<VirtualJoystick>();
+
+        if (groundCheck == null)
+        {
+            GameObject groundCheckObj = new GameObject("GroundCheck");
+            groundCheckObj.transform.SetParent(transform);
+            groundCheckObj.transform.localPosition = new Vector3(0, -0.5f, 0);
+            groundCheck = groundCheckObj.transform;
+        }
     }
 
-    void OnMove(InputValue value) => inputVec = value.Get<Vector2>();
-}
+    void Update()
+    {
+        // 바닥 체크
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayerMask);
 
+        // 이동
+        float moveInput = GetHorizontalInput();
+        rb.linearVelocity = new Vector2(moveInput * GetMoveSpeed(), rb.linearVelocity.y);
+
+        // 점프
+        if (GetJumpInput() && isGrounded)
+        {
+            Jump();
+        }
+    }
+
+    private void Jump()
+    {
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+    }
+
+    public float GetMoveSpeed()
+    {
+        return moveSpeed * speedMultiplier;
+    }
+
+    public void SetSpeedMultiplier(float multiplier)
+    {
+        speedMultiplier = multiplier;
+    }
+
+    private float GetHorizontalInput()
+    {
+#if UNITY_EDITOR
+        try
+        {
+            return Input.GetAxis("Horizontal");
+        }
+        catch (System.Exception)
+        {
+            return 0f; // Input System 충돌 시 임시 처리
+        }
+#else
+    return joystick != null ? joystick.Horizontal : 0f;
+#endif
+    }
+
+    private bool GetJumpInput()
+    {
+#if UNITY_EDITOR
+        return Input.GetButtonDown("Jump");
+#else
+        return joystick != null && joystick.IsJumping;
+#endif
+    }
+
+
+    void OnDrawGizmosSelected()
+    {
+        if (groundCheck != null)
+        {
+            Gizmos.color = isGrounded ? Color.green : Color.red;
+            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+        }
+    }
+}

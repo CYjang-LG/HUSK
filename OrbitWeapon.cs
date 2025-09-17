@@ -1,22 +1,29 @@
-// OrbitWeapon.cs
 using UnityEngine;
 
 public class OrbitWeapon : WeaponBase
 {
-    private const int OrbitPierceSentinel = -100; // 궤도형 탄환 구분 값
+    // 회전 무기의 속도 구현
+    private float _speed = 150f;
+    public override float Speed
+    {
+        get => _speed;
+        set => _speed = value;
+    }
+
+    private const int OrbitPierceSentinel = -100;
 
     void Start() => Batch();
 
     void Update()
     {
         if (!GameManager.instance.isLive) return;
-        transform.Rotate(Vector3.back * orbitSpeed * Time.deltaTime);
+        transform.Rotate(Vector3.back * _speed * Time.deltaTime);
     }
 
     public override void Init(ItemData data, PoolManager pool, int prefabId, Scanner scanner, float damageMul, int extraCount)
     {
         base.Init(data, pool, prefabId, scanner, damageMul, extraCount);
-        // 초기 orbitSpeed는 캐릭터/장비 배수에서 ApplyRateMultipliers로 조정
+        _speed = 150f; // 기본값, 필요시 Gear 등에서 변경
     }
 
     public override void LevelUp(float nextDamage, int addCount)
@@ -53,5 +60,10 @@ public class OrbitWeapon : WeaponBase
             b.Init(damage, OrbitPierceSentinel, Vector3.zero, 0f);
         }
     }
-}
 
+    public override void ApplyRateMultipliers(float orbitSpeedMul, float fireIntervalMul)
+    {
+        base.ApplyRateMultipliers(orbitSpeedMul, fireIntervalMul);
+        _speed = 150f * orbitSpeedMul;
+    }
+}
