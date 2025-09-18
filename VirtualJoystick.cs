@@ -16,7 +16,7 @@ public class VirtualJoystick : MonoBehaviour, IDragHandler, IPointerUpHandler, I
     void Start()
     {
         if (backgroundImage == null || joystickImage == null)
-            Debug.LogError("VirtualJoystick: ÀÌ¹ÌÁö¸¦ ÇÒ´çÇØÁÖ¼¼¿ä!");
+            Debug.LogError("VirtualJoystick: Ã€ÃŒÂ¹ÃŒÃÃ¶Â¸Â¦ Ã‡Ã’Â´Ã§Ã‡Ã˜ÃÃ–Â¼Â¼Â¿Ã¤!");
     }
 
     public void OnDrag(PointerEventData eventData)
