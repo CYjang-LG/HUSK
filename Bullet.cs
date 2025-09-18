@@ -9,41 +9,24 @@ public class Bullet : MonoBehaviour
 
     void Awake() => rb = GetComponent<Rigidbody2D>();
 
-    public void Init(float damage, int pierce, Vector3 dir, float speed)
+    public void Init(float dmg, int p, Vector3 dir, float speed)
     {
-        this.damage = damage;
-        this.pierce = pierce;
-        if (pierce >= 0)
-        {
-            rb.linearVelocity = dir * speed;
-        }
-        else
-        {
-            rb.linearVelocity = Vector2.zero; // 궤도형
-        }
+        damage = dmg; pierce = p;
+        rb.linearVelocity = (p >= 0) ? dir * speed : Vector2.zero;
     }
 
-    // 새로 추가하는 데미지 설정 메서드
-    public void SetDamage(float dmg)
-    {
-        damage = dmg;
-    }
+    public void SetDamage(float d) => damage = d;
 
-    void OnTriggerEnter2D(Collider2D collision)
+    void OnTriggerEnter2D(Collider2D c)
     {
-        // 원거리 탄만 소멸 규칙 적용
-        if (!collision.CompareTag("Enemy") || pierce == OrbitPierceSentinel) return;
+        if (!c.CompareTag("Enemy") || pierce == OrbitPierceSentinel) return;
         pierce--;
-        if (pierce < 0)
-        {
-            rb.linearVelocity = Vector2.zero;
-            gameObject.SetActive(false);
-        }
+        if (pierce < 0) { rb.linearVelocity = Vector2.zero; gameObject.SetActive(false); }
     }
 
-    void OnTriggerExit2D(Collider2D collision)
+    void OnTriggerExit2D(Collider2D c)
     {
-        if (!collision.CompareTag("Area") || pierce == OrbitPierceSentinel) return;
+        if (!c.CompareTag("Area") || pierce == OrbitPierceSentinel) return;
         gameObject.SetActive(false);
     }
 }

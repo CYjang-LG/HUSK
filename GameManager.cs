@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour
     public int[] nextExp = { 10, 30, 60, 100, 150, 210, 280, 360, 450, 600 };
 
     [Header("# Game Object")]
-    public Player player;
+    public PlayerSetup player;
     public PoolManager pool;
     public LevelUp uiLevelUp;
     public Result uiResult;
@@ -33,6 +33,10 @@ public class GameManager : MonoBehaviour
         instance = this;
     }
 
+    void Start()
+    {
+        GameStart(0);
+    }
     public void GameStart(int id)
     {
         playerId = id;

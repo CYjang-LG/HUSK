@@ -4,29 +4,19 @@ using System;
 
 public class Health : MonoBehaviour
 {
-    public event Action<float> OnHealthChanged;
+    public float maxHealth = 100f;
+    public float currentHealth { get; private set; }
 
-    [Min(1f)] public float maxHealth = 100f;
-    private float cur;
+    void Awake() => currentHealth = maxHealth;
 
-    void OnEnable() => cur = maxHealth;
+    public void SetMaxHealth(float m) => maxHealth = m;
+    public void ResetHealth() => currentHealth = maxHealth;
 
-    public void HealFull()
+    public void TakeDamage(float d)
     {
-        cur = maxHealth;
-        OnHealthChanged?.Invoke(cur);
+        currentHealth = Mathf.Max(currentHealth-d, d);
+        if (currentHealth == 0)
+            GameManager.instance.GameOver();
     }
-
-    public void Damage(float amountPerSec)
-    {
-        if (!GameManager.instance.isLive) return;
-
-        cur = Mathf.Max(0f, cur - amountPerSec * Time.deltaTime);
-        OnHealthChanged?.Invoke(cur);
-
-        if (cur <= 0f) GameManager.instance.GameOver();
-    }
-
-    public float Get() => cur;
 }
 

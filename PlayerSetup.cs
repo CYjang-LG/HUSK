@@ -7,16 +7,18 @@ using UnityEngine;
 public class PlayerSetup : MonoBehaviour
 {
     public CharacterProfile[] profiles;
-    public SpriteRenderer playerSprite;
+
+    //component exm
     public PlayerMovement movement;
     public PlayerCombat combat;
-
+    public Health health;
     public CharacterProfile SelectedProfile { get; private set; }
 
     void Awake()
     {
-        if (movement == null) movement = GetComponent<PlayerMovement>();
-        if (combat == null) combat = GetComponent<PlayerCombat>();
+        movement = GetComponent<PlayerMovement>();
+        combat = GetComponent<PlayerCombat>();
+        health = GetComponent<Health>();
     }
 
     void OnEnable()
@@ -32,8 +34,9 @@ public class PlayerSetup : MonoBehaviour
         combat.SetOrbitSpeedMultiplier(SelectedProfile.weaponSpeedMul);
         combat.SetFireIntervalMultiplier(SelectedProfile.weaponRateMul);
 
-        // 애니메이터/스킨 교체가 있다면 여기서 처리
-        // ex) GetComponent<Animator>().runtimeAnimatorController = ...
+        //player health reset
+        health.SetMaxHealth(SelectedProfile.maxHealth);
+        health.ResetHealth();
     }
 }
 

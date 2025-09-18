@@ -19,12 +19,11 @@ public class Hand : MonoBehaviour
     void Awake()
     {
         // 부모에 있는 Player 컴포넌트를 먼저 찾습니다.
-        Player player = GetComponentInParent<Player>();
+        PlayerSetup player = GetComponentInParent<PlayerSetup>();
         if (player != null)
         {
             // Player 컴포넌트를 통해 다른 컴포넌트들을 안전하게 가져옵니다.
             playerSprite = player.GetComponent<SpriteRenderer>();
-            scanner = player.scanner;
         }
         else
         {

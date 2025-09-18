@@ -47,10 +47,15 @@ public class Gear : MonoBehaviour
                 break;
             case ItemData.ItemType.Shoe:
                 // 플레이어 이동 속도 조정
-                var playerComp = GameManager.instance.player;
-                if (playerComp != null)
+                var playerSetup = GameManager.instance.player;
+                if(playerSetup != null)
                 {
-                    playerComp.speed = 3f + 3f * rate;
+                    var movement = playerSetup.GetComponent<PlayerMovement>();
+                    if(movement != null)
+                    {
+                        float newSpeed = 3f + 3f * rate;
+                        movement.SetBaseMoveSpeed(newSpeed);
+                    }
                 }
                 break;
             default:

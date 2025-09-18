@@ -7,15 +7,15 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("이동 설정")]
     public float moveSpeed = 5f;
+    private float speedMultiplier = 1f;
 
     [Header("점프 설정")]
-    public float jumpForce = 12f;
-    public LayerMask groundLayerMask = 1; // Ground 레이어 설정
-    public Transform groundCheck; // 발밑 체크 포인트
+    public float jumpForce = 5f;
+    public LayerMask groundLayerMask = 1;
+    public Transform groundCheck;
     public float groundCheckRadius = 0.2f;
 
     private bool isGrounded;
-    private float speedMultiplier = 1f;
 
     void Awake()
     {
@@ -24,69 +24,47 @@ public class PlayerMovement : MonoBehaviour
 
         if (groundCheck == null)
         {
-            GameObject groundCheckObj = new GameObject("GroundCheck");
-            groundCheckObj.transform.SetParent(transform);
-            groundCheckObj.transform.localPosition = new Vector3(0, -0.5f, 0);
-            groundCheck = groundCheckObj.transform;
+            var go = new GameObject("GroundCheck");
+            go.transform.SetParent(transform);
+            go.transform.localPosition = Vector3.down * 0.5f;
+            groundCheck = go.transform;
         }
     }
 
     void Update()
     {
-        // 바닥 체크
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayerMask);
+        isGrounded = Physics2D.OverlapCircle(
+            groundCheck.position, groundCheckRadius, groundLayerMask);
 
-        // 이동
-        float moveInput = GetHorizontalInput();
-        rb.linearVelocity = new Vector2(moveInput * GetMoveSpeed(), rb.linearVelocity.y);
+        float h = GetHorizontalInput();
+        rb.linearVelocity = new Vector2(h* moveSpeed * speedMultiplier, rb.linearVelocity.y);
 
-        // 점프
         if (GetJumpInput() && isGrounded)
-        {
-            Jump();
-        }
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
     }
 
-    private void Jump()
-    {
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-    }
-
-    public float GetMoveSpeed()
-    {
-        return moveSpeed * speedMultiplier;
-    }
-
-    public void SetSpeedMultiplier(float multiplier)
-    {
-        speedMultiplier = multiplier;
-    }
+    public void SetSpeedMultiplier(float m) => speedMultiplier = m;
+    public void SetBaseMoveSpeed(float s) => moveSpeed = s;
 
     private float GetHorizontalInput()
     {
 #if UNITY_EDITOR
-        try
-        {
-            return Input.GetAxis("Horizontal");
-        }
-        catch (System.Exception)
-        {
-            return 0f; // Input System 충돌 시 임시 처리
-        }
+        try { return Input.GetAxis("Horizontal"); }
+        catch { return 0f; }
 #else
-    return joystick != null ? joystick.Horizontal : 0f;
+        return joystick != null ? joystick.Horizontal : 0f;
 #endif
     }
 
     private bool GetJumpInput()
     {
 #if UNITY_EDITOR
-        return Input.GetButtonDown("Jump");
+        try { return Input.GetButtonDown("Jump"); }
+        catch { return false; }
 #else
         return joystick != null && joystick.IsJumping;
 #endif
     }
-
 
     void OnDrawGizmosSelected()
     {

@@ -5,7 +5,6 @@ public class Item : MonoBehaviour
 {
     [Header("Item Data")]
     public ItemData data;
-
     [Header("Level")]
     public int level;
 
@@ -19,70 +18,77 @@ public class Item : MonoBehaviour
     private Text textName;
     private Text textDesc;
 
-    private Player player;
+    // PlayerSetup 참조
+    private PlayerSetup playerSetup;
 
     void Awake()
     {
         // UI 컴포넌트 캐싱
         var images = GetComponentsInChildren<Image>(true);
-        icon = images.Length > 1 ? images[1] : null;
-        icon.sprite = data.itemIcon;
+        if (images.Length > 1)
+            icon = images[1];
+        if (icon != null)
+            icon.sprite = data.itemIcon;
 
         var texts = GetComponentsInChildren<Text>(true);
         if (texts.Length >= 3)
         {
             textLevel = texts[0];
-            textName  = texts[1];
-            textDesc  = texts[2];
+            textName = texts[1];
+            textDesc = texts[2];
         }
-        textName.text = data.itemName;
+        if (textName != null)
+            textName.text = data.itemName;
 
-        // 플레이어 참조
-        player = GameManager.instance.player;
+        // PlayerSetup 참조
+        playerSetup = GameManager.instance.player;
+        if (playerSetup == null)
+            Debug.LogError("Item: GameManager.instance.player가 할당되지 않았습니다!");
     }
 
     void OnEnable()
     {
-        // 레벨 표시
-        textLevel.text = $"Lv.{level + 1}";
+        if (textLevel != null)
+            textLevel.text = $"Lv.{level + 1}";
 
-        // 설명 업데이트
-        switch (data.itemType)
+        if (textDesc != null)
         {
-            case ItemData.ItemType.Melee:
-            case ItemData.ItemType.Range:
-                float dmgPercent = data.damages[level] * 100f;
-                int cnt = data.counts[level];
-                textDesc.text = string.Format(data.itemDesc, dmgPercent, cnt);
-                break;
+            switch (data.itemType)
+            {
+                case ItemData.ItemType.Melee:
+                case ItemData.ItemType.Range:
+                    float dmgPercent = data.damages[level] * 100f;
+                    int cnt = data.counts[level];
+                    textDesc.text = string.Format(data.itemDesc, dmgPercent, cnt);
+                    break;
 
-            case ItemData.ItemType.Glove:
-            case ItemData.ItemType.Shoe:
-                float ratePercent = data.damages[level] * 100f;
-                textDesc.text = string.Format(data.itemDesc, ratePercent);
-                break;
+                case ItemData.ItemType.Glove:
+                case ItemData.ItemType.Shoe:
+                    float ratePercent = data.damages[level] * 100f;
+                    textDesc.text = string.Format(data.itemDesc, ratePercent);
+                    break;
 
-            default:
-                textDesc.text = string.Format(data.itemDesc);
-                break;
+                default:
+                    textDesc.text = data.itemDesc;
+                    break;
+            }
         }
     }
 
     public void OnClick()
     {
-        // 이미 회복 아이템이라면 즉시 전체 체력 회복
+        // 회복 아이템
         if (data.itemType == ItemData.ItemType.Heal)
         {
             GameManager.instance.health = GameManager.instance.maxHealth;
             return;
         }
 
-        // Gear 또는 Weapon 생성 또는 레벨업
+        // Gear 아이템 (Glove, Shoe)
         if (data.itemType == ItemData.ItemType.Glove || data.itemType == ItemData.ItemType.Shoe)
         {
             if (level == 0)
             {
-                // Gear 생성
                 gear = new GameObject($"Gear_{data.itemId}")
                     .AddComponent<Gear>();
                 gear.Init(data);
@@ -92,22 +98,24 @@ public class Item : MonoBehaviour
                 gear.LevelUp(data.damages[level]);
             }
         }
+        // Weapon 아이템 (Melee, Range 등)
         else
         {
+            // Scanner를 PlayerSetup에서 가져오기
+            Scanner scanner = playerSetup.GetComponent<Scanner>();
             if (level == 0)
             {
-                // WeaponBase 생성 (팩토리 없이 직접 호출 예시)
                 weaponBase = WeaponFactory.CreateWeapon(
                     data,
                     GameManager.instance.pool,
-                    player.scanner,
-                    player.transform
+                    scanner,
+                    playerSetup.transform
                 );
             }
-            else
+            else if (weaponBase != null)
             {
                 float nextDamage = data.baseDamage * data.damages[level];
-                int nextCount   = data.counts[level];
+                int nextCount = data.counts[level];
                 weaponBase.LevelUp(nextDamage, nextCount);
             }
         }

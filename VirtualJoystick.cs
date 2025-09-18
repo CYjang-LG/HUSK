@@ -16,7 +16,7 @@ public class VirtualJoystick : MonoBehaviour, IDragHandler, IPointerUpHandler, I
     void Start()
     {
         if (backgroundImage == null || joystickImage == null)
-            Debug.LogError("VirtualJoystick: Ã€ÃŒÂ¹ÃŒÃÃ¶Â¸Â¦ Ã‡Ã’Â´Ã§Ã‡Ã˜ÃÃ–Â¼Â¼Â¿Ã¤!");
+            Debug.LogError("VirtualJoystick: ÀÌ¹ÌÁö¸¦ ÇÒ´çÇØÁÖ¼¼¿ä!");
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -58,7 +58,9 @@ public class VirtualJoystick : MonoBehaviour, IDragHandler, IPointerUpHandler, I
         Invoke("ResetJump", 0.1f);
     }
 
-    private void ResetJump()
+
+
+    public void ResetJump()
     {
         IsJumping = false;
     }

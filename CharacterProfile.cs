@@ -9,5 +9,6 @@ public class CharacterProfile : ScriptableObject
     [Min(0f)] public float weaponSpeedMul = 1f;
     [Min(0f)] public float weaponRateMul = 1f;
     [Min(0f)] public float damageMul = 1f;
+    [Min(0f)] public float maxHealth = 100f;
     public int extraProjectileCount = 0;
 }

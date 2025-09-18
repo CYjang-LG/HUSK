@@ -25,7 +25,7 @@ public class PlayerEquipment : MonoBehaviour
                 movement.SetSpeedMultiplier(1f + rate);
                 break;
             case ItemData.ItemType.Glove:
-                combat.IncreaseAttackSpeed(rate);
+                combat.SetDamageMultiplier(rate);
                 break;
         }
     }

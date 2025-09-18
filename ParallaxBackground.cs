@@ -7,6 +7,7 @@ public class ParallaxBackground : MonoBehaviour
     {
         public Transform transform;
         public float parallaxFactor;
+        public float width;
     }
 
     public Layer[] layers;
@@ -26,10 +27,27 @@ public class ParallaxBackground : MonoBehaviour
         if (cameraTransform == null) return;
 
         Vector3 delta = cameraTransform.position - lastCameraPos;
+
         foreach (var layer in layers)
         {
+            if (layer.transform == null) continue;
+
             Vector3 newPos = layer.transform.position + new Vector3(delta.x * layer.parallaxFactor, 0, 0);
             layer.transform.position = newPos;
+
+            if (layer.width>0)
+            {
+                float cameraX = cameraTransform.position.x;
+                float layerX = layer.transform.position.x; 
+                if(layerX <cameraX - layer.width)
+                {
+                    layer.transform.position += new Vector3(layer.width * 2, 0, 0);
+                }
+                else if (layerX >cameraX + layer.width)
+                {
+                    layer.transform.position -= new Vector3(layer.width * 2, 0, 0);
+                }
+            }
         }
         lastCameraPos = cameraTransform.position;
     }
