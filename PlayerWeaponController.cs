@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 public class PlayerWeaponController : MonoBehaviour
 {
-    [Header("¹«±â ½½·Ô")]
-    public Transform[] weaponSlots = new Transform[3]; // ÃÖ´ë 3°³ ¹«±â
+    [Header("ë¬´ê¸° ìŠ¬ë¡¯")]
+    public Transform[] weaponSlots = new Transform[3]; // ìµœëŒ€ 3ê°œ ë¬´ê¸°
 
-    [Header("¼Õ ÄÁÆ®·Ñ·¯")]
+    [Header("ì† ì»¨íŠ¸ë¡¤ëŸ¬")]
     public HandController handController;
 
     private List<WeaponBase> equippedWeapons = new List<WeaponBase>();
@@ -16,7 +16,7 @@ public class PlayerWeaponController : MonoBehaviour
     {
         scanner = GetComponent<Scanner>();
 
-        // ¹«±â ½½·Ô »ı¼º
+        // ë¬´ê¸° ìŠ¬ë¡¯ ìƒì„±
         for (int i = 0; i < weaponSlots.Length; i++)
         {
             if (weaponSlots[i] == null)
@@ -31,15 +31,15 @@ public class PlayerWeaponController : MonoBehaviour
 
     public bool EquipWeapon(ItemData weaponData)
     {
-        // ºó ½½·Ô Ã£±â
+        // ë¹ˆ ìŠ¬ë¡¯ ì°¾ê¸°
         int emptySlot = FindEmptySlot();
         if (emptySlot == -1)
         {
-            Debug.Log("¹«±â ½½·ÔÀÌ °¡µæ Âü!");
+            Debug.Log("ë¬´ê¸° ìŠ¬ë¡¯ì´ ê°€ë“ ì°¸!");
             return false;
         }
 
-        // ¹«±â »ı¼º
+        // ë¬´ê¸° ìƒì„±
         WeaponBase weapon = WeaponFactory.CreateWeapon(
             weaponData,
             GameManager.instance.pool,
@@ -51,13 +51,13 @@ public class PlayerWeaponController : MonoBehaviour
         {
             equippedWeapons.Add(weapon);
 
-            // ¼Õ¿¡ ¹«±â ½ºÇÁ¶óÀÌÆ® ¼³Á¤
+            // ì†ì— ë¬´ê¸° ìŠ¤í”„ë¼ì´íŠ¸ ì„¤ì •
             if (handController != null && weaponData.handSprite != null)
             {
                 handController.SetHandSprite(emptySlot, weaponData.handSprite, true);
             }
 
-            Debug.Log($"¹«±â ÀåÂø: {weaponData.itemName}");
+            Debug.Log($"ë¬´ê¸° ì¥ì°©: {weaponData.itemName}");
             return true;
         }
 
@@ -74,7 +74,7 @@ public class PlayerWeaponController : MonoBehaviour
             equippedWeapons.RemoveAt(slotIndex);
             Destroy(weapon.gameObject);
 
-            // ¼Õ¿¡¼­ ¹«±â Á¦°Å
+            // ì†ì—ì„œ ë¬´ê¸° ì œê±°
             if (handController != null)
             {
                 handController.SetHandSprite(slotIndex, null, false);
