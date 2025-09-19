@@ -3,32 +3,32 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "StageData", menuName = "Game/Stage Data")]
 public class StageData : ScriptableObject
 {
-    [Header("½ºÅ×ÀÌÁö Á¤º¸")]
+    [Header("ìŠ¤í…Œì´ì§€ ì •ë³´")]
     public int stageNumber = 1;
     public string stageName = "Stage 1";
     [TextArea(2, 4)]
-    public string stageDescription = "Ã¹ ¹øÂ° ½ºÅ×ÀÌÁö";
+    public string stageDescription = "ì²« ë²ˆì§¸ ìŠ¤í…Œì´ì§€";
 
-    [Header("°ÔÀÓ Á¶°Ç")]
+    [Header("ê²Œìž„ ì¡°ê±´")]
     public GameConditions gameConditions;
 
-    [Header("Àû ½ºÆù ¼³Á¤")]
-    public EnemySpawnProfile enemySpawnProfile; // ScriptableObject ÂüÁ¶
-    public SpawnData[] customSpawnData; // ¶Ç´Â Á÷Á¢ ¹è¿­ ¼³Á¤
+    [Header("ì  ìŠ¤í° ì„¤ì •")]
+    public EnemySpawnProfile enemySpawnProfile; // ScriptableObject ì°¸ì¡°
+    public SpawnData[] customSpawnData; // ë˜ëŠ” ì§ì ‘ ë°°ì—´ ì„¤ì •
 
-    [Header("¹è°æ/À½¾Ç")]
+    [Header("ë°°ê²½/ìŒì•…")]
     public GameObject backgroundPrefab;
     public AudioClip bgmClip;
 
-    [Header("´ÙÀ½ ½ºÅ×ÀÌÁö")]
+    [Header("ë‹¤ìŒ ìŠ¤í…Œì´ì§€")]
     public StageData nextStage;
-    public string nextSceneName; // Scene ÀÌ¸§ (¼±ÅÃ»çÇ×)
+    public string nextSceneName; // Scene ì´ë¦„ (ì„ íƒì‚¬í•­)
 
-    [Header("Æ¯º° ÀÌº¥Æ®")]
+    [Header("íŠ¹ë³„ ì´ë²¤íŠ¸")]
     public bool hasSpecialEvent = false;
-    public float specialEventTime = 30f; // Æ¯º° ÀÌº¥Æ® ¹ß»ý ½Ã°£
+    public float specialEventTime = 30f; // íŠ¹ë³„ ì´ë²¤íŠ¸ ë°œìƒ ì‹œê°„
 
-    // ½ºÆù µ¥ÀÌÅÍ °¡Á®¿À±â (¿ì¼±¼øÀ§: customSpawnData ¡æ enemySpawnProfile)
+    // ìŠ¤í° ë°ì´í„° ê°€ì ¸ì˜¤ê¸° (ìš°ì„ ìˆœìœ„: customSpawnData â†’ enemySpawnProfile)
     public SpawnData[] GetSpawnData()
     {
         if (customSpawnData != null && customSpawnData.Length > 0)
@@ -41,7 +41,7 @@ public class StageData : ScriptableObject
             return enemySpawnProfile.levelSpawnData;
         }
 
-        // ±âº»°ª ¹ÝÈ¯
+        // ê¸°ë³¸ê°’ ë°˜í™˜
         return new SpawnData[]
         {
             new SpawnData { spriteType = 0, health = 50, speed = 1f, spawnTime = 3f }
