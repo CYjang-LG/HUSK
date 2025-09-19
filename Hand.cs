@@ -24,6 +24,7 @@ public class Hand : MonoBehaviour
         {
             // Player 컴포넌트를 통해 다른 컴포넌트들을 안전하게 가져옵니다.
             playerSprite = player.GetComponent<SpriteRenderer>();
+            scanner = playerSprite.GetComponent<Scanner>();
         }
         else
         {
@@ -78,14 +79,15 @@ public class Hand : MonoBehaviour
                 spriter.flipX = false;
 
                 // 플레이어 방향에 따라 렌더링 순서를 조절합니다.
-                spriter.sortingOrder = isReverse ? 6 : 6;
+                spriter.sortingOrder = 6;
             }
             else
             {
                 transform.localPosition = isReverse ? rightPosReverse : rightPos;
+                transform.localRotation = Quaternion.identity;
                 spriter.flipX = isReverse;
                 spriter.flipY = false;
-                spriter.sortingOrder = isReverse ? 6 : 6;
+                spriter.sortingOrder = 6;
             }
         }
     }

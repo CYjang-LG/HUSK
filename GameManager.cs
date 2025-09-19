@@ -1,17 +1,17 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
-    
+
     [Header("# Game Control")]
     public bool isLive;
     public float gameTime;
-    public float maxGameTime = 2 * 10f;
-    
+    public float maxGameTime = 20f; // 🔥 maxGameTime 필드 추가
+    public GameConditions gameConditions; // 게임 조건 설정
+
     [Header("# Player Info")]
     public int playerId;
     public float health;
@@ -28,6 +28,12 @@ public class GameManager : MonoBehaviour
     public Result uiResult;
     public GameObject enemyCleaner;
 
+    [Header("# Stage System")]
+    public StageManager stageManager; // 스테이지 매니저 참조
+
+    private Health playerHealth;
+    private bool bossKilled = false;
+
     void Awake()
     {
         instance = this;
@@ -37,19 +43,111 @@ public class GameManager : MonoBehaviour
     {
         GameStart(0);
     }
+
     public void GameStart(int id)
     {
         playerId = id;
-        maxHealth = 100;
-        health = maxHealth;
+
+        // 게임 조건이 설정되어 있으면 시간 제한 적용
+        if (gameConditions != null && gameConditions.useTimeLimit)
+        {
+            maxGameTime = gameConditions.timeLimit;
+        }
+
+        if (player != null)
+        {
+            playerHealth = player.GetComponent<Health>();
+            if (playerHealth != null)
+            {
+                maxHealth = playerHealth.maxHealth;
+                health = maxHealth;
+            }
+        }
 
         player.gameObject.SetActive(true);
-        uiLevelUp.Select(playerId % 2);
+
+        // 안전한 배열 접근
+        if (playerId >= 0 && playerId < 2)
+            uiLevelUp.Select(playerId);
+        else
+            uiLevelUp.Select(0);
 
         Resume();
-
         AudioManager.instance.PlayBgm(true);
         AudioManager.instance.PlaySfx(AudioManager.Sfx.Select);
+    }
+
+    void Update()
+    {
+        if (!isLive) return;
+
+        gameTime += Time.deltaTime;
+
+        // Health 동기화
+        if (playerHealth != null)
+            health = playerHealth.currentHealth;
+
+        // 승리 조건 체크 (기본 시간 제한)
+        if (gameTime >= maxGameTime)
+        {
+            gameTime = maxGameTime;
+            GameVictory();
+            return;
+        }
+
+        // 추가 게임 조건 체크
+        CheckWinConditions();
+        CheckLoseConditions();
+    }
+
+    void CheckWinConditions()
+    {
+        if (gameConditions == null) return;
+
+        bool shouldWin = false;
+
+        // 킬 수 승리
+        if (gameConditions.useKillTarget && kill >= gameConditions.killTarget)
+        {
+            shouldWin = true;
+        }
+
+        // 보스 처치 승리
+        if (gameConditions.useBossKill && bossKilled)
+        {
+            shouldWin = true;
+        }
+
+        if (shouldWin)
+        {
+            GameVictory();
+        }
+    }
+
+    void CheckLoseConditions()
+    {
+        if (gameConditions == null) return;
+
+        // 체력 0 패배
+        if (gameConditions.useHealthZero && health <= 0)
+        {
+            GameOver();
+        }
+
+        // 최대 적 수 초과 패배
+        if (gameConditions.useMaxEnemies)
+        {
+            int enemyCount = GameObject.FindGameObjectsWithTag("Enemy").Length;
+            if (enemyCount >= gameConditions.maxEnemiesOnScreen)
+            {
+                GameOver();
+            }
+        }
+    }
+
+    public void OnBossKilled()
+    {
+        bossKilled = true;
     }
 
     public void GameOver()
@@ -82,9 +180,18 @@ public class GameManager : MonoBehaviour
 
         yield return new WaitForSeconds(0.5f);
 
-        uiResult.gameObject.SetActive(true);
-        uiResult.Win();
-        Stop();
+        // 🔥 StageManager가 있으면 스테이지 클리어 처리, 없으면 기본 승리 UI
+        if (stageManager != null)
+        {
+            stageManager.OnGameVictory();
+        }
+        else
+        {
+            // 기본 승리 처리
+            uiResult.gameObject.SetActive(true);
+            uiResult.Win();
+            Stop();
+        }
 
         AudioManager.instance.PlayBgm(false);
         AudioManager.instance.PlaySfx(AudioManager.Sfx.Win);
@@ -92,34 +199,20 @@ public class GameManager : MonoBehaviour
 
     public void GameRetry()
     {
-        SceneManager.LoadScene(0);
-    }
-
-    void Update()
-    {
-        if (!isLive)
-            return;
-
-        gameTime += Time.deltaTime;
-
-        if (gameTime > maxGameTime)
-        {
-            gameTime = maxGameTime;
-            GameVictory();
-        }
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     public void GetExp()
     {
-        if (!isLive)
-            return;
+        if (!isLive) return;
 
         exp++;
-        if (exp == nextExp[Mathf.Min(level, nextExp.Length - 1)])
+        int levelIndex = Mathf.Min(level, nextExp.Length - 1);
+        if (exp >= nextExp[levelIndex])
         {
             level++;
             exp = 0;
-            uiLevelUp.Show(); // 메서드명 일관성 수정
+            uiLevelUp.Show();
         }
     }
 
@@ -128,7 +221,7 @@ public class GameManager : MonoBehaviour
         isLive = false;
         Time.timeScale = 0;
     }
-    
+
     public void Resume()
     {
         isLive = true;

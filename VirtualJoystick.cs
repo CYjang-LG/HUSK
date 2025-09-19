@@ -1,41 +1,51 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class VirtualJoystick : MonoBehaviour, IDragHandler, IPointerUpHandler, IPointerDownHandler
 {
+    [Header("UI References")]
     public Image backgroundImage;
     public Image joystickImage;
+
+    [Header("Settings")]
+    public float deadZone = 0.1f;
+
     private Vector2 inputVector = Vector2.zero;
 
-    public float Horizontal => inputVector.x;
-    public float Vertical => inputVector.y;
+    // 🔥 public 접근자 추가
+    public Vector2 InputVector => inputVector;
+
+    public float Horizontal => Mathf.Abs(inputVector.x) > deadZone ? inputVector.x : 0f;
+    public float Vertical => Mathf.Abs(inputVector.y) > deadZone ? inputVector.y : 0f;
     public bool IsFiring { get; private set; }
     public bool IsJumping { get; private set; }
 
     void Start()
     {
         if (backgroundImage == null || joystickImage == null)
-            Debug.LogError("VirtualJoystick: ÀÌ¹ÌÁö¸¦ ÇÒ´çÇØÁÖ¼¼¿ä!");
+            Debug.LogError("VirtualJoystick: 이미지를 할당해주세요!");
     }
 
     public void OnDrag(PointerEventData eventData)
     {
         Vector2 pos;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
             backgroundImage.rectTransform,
             eventData.position,
             eventData.pressEventCamera,
-            out pos);
+            out pos))
+        {
+            pos.x /= backgroundImage.rectTransform.sizeDelta.x;
+            pos.y /= backgroundImage.rectTransform.sizeDelta.y;
 
-        pos.x /= backgroundImage.rectTransform.sizeDelta.x;
-        pos.y /= backgroundImage.rectTransform.sizeDelta.y;
+            inputVector = new Vector2(pos.x * 2, pos.y * 2);
+            inputVector = (inputVector.magnitude > 1.0f) ? inputVector.normalized : inputVector;
 
-        inputVector = new Vector2(pos.x * 2, pos.y * 2);
-        inputVector = (inputVector.magnitude > 1.0f) ? inputVector.normalized : inputVector;
-        joystickImage.rectTransform.anchoredPosition = new Vector2(
-            inputVector.x * (backgroundImage.rectTransform.sizeDelta.x / 2),
-            inputVector.y * (backgroundImage.rectTransform.sizeDelta.y / 2));
+            joystickImage.rectTransform.anchoredPosition = new Vector2(
+                inputVector.x * (backgroundImage.rectTransform.sizeDelta.x / 2),
+                inputVector.y * (backgroundImage.rectTransform.sizeDelta.y / 2));
+        }
     }
 
     public void OnPointerDown(PointerEventData eventData)
@@ -54,13 +64,14 @@ public class VirtualJoystick : MonoBehaviour, IDragHandler, IPointerUpHandler, I
 
     public void OnJumpButtonDown()
     {
-        IsJumping = true;
-        Invoke("ResetJump", 0.1f);
+        if (!IsJumping) // 중복 점프 방지
+        {
+            IsJumping = true;
+            Invoke(nameof(ResetJump), 0.1f);
+        }
     }
 
-
-
-    public void ResetJump()
+    private void ResetJump()
     {
         IsJumping = false;
     }

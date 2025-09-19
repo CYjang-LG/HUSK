@@ -25,10 +25,13 @@ public class Item : MonoBehaviour
     {
         // UI 컴포넌트 캐싱
         var images = GetComponentsInChildren<Image>(true);
-        if (images.Length > 1)
+        if (images.Length >= 1)
+        {
             icon = images[1];
-        if (icon != null)
-            icon.sprite = data.itemIcon;
+            if (icon != null)
+                icon.sprite = data.itemIcon;
+        }
+
 
         var texts = GetComponentsInChildren<Text>(true);
         if (texts.Length >= 3)
@@ -57,15 +60,22 @@ public class Item : MonoBehaviour
             {
                 case ItemData.ItemType.Melee:
                 case ItemData.ItemType.Range:
-                    float dmgPercent = data.damages[level] * 100f;
-                    int cnt = data.counts[level];
-                    textDesc.text = string.Format(data.itemDesc, dmgPercent, cnt);
+                    if (level < data.damages.Length)
+                    {
+                        float dmgPercent = data.damages[level] * 100f;
+                        int cnt = level < data.counts.Length ? data.counts[level] : 0;
+                        textDesc.text = string.Format(data.itemDesc, dmgPercent, cnt);
+                    }
                     break;
 
                 case ItemData.ItemType.Glove:
                 case ItemData.ItemType.Shoe:
-                    float ratePercent = data.damages[level] * 100f;
-                    textDesc.text = string.Format(data.itemDesc, ratePercent);
+                    if (level < data.damages.Length)
+                    {
+                        float ratePercent = data.damages[level] * 100f;
+                        textDesc.text = string.Format(data.itemDesc, ratePercent);
+
+                    }
                     break;
 
                 default:
@@ -77,10 +87,13 @@ public class Item : MonoBehaviour
 
     public void OnClick()
     {
+        if (data == null) return;
         // 회복 아이템
         if (data.itemType == ItemData.ItemType.Heal)
         {
-            GameManager.instance.health = GameManager.instance.maxHealth;
+            var playerHealth = playerSetup?.GetComponent<Health>();
+            if (playerHealth != null)
+                playerHealth.heal(playerHealth.maxHealth);
             return;
         }
 
@@ -89,37 +102,37 @@ public class Item : MonoBehaviour
         {
             if (level == 0)
             {
-                gear = new GameObject($"Gear_{data.itemId}")
-                    .AddComponent<Gear>();
+                GameObject gearObj = new GameObject($"Gear_{data.itemId}");
+                gear = gearObj.AddComponent<Gear>();
                 gear.Init(data);
             }
-            else
+            else if (gear != null && level < data.damages.Length)
             {
                 gear.LevelUp(data.damages[level]);
             }
-        }
-        // Weapon 아이템 (Melee, Range 등)
-        else
-        {
-            // Scanner를 PlayerSetup에서 가져오기
-            Scanner scanner = playerSetup.GetComponent<Scanner>();
-            if (level == 0)
+            // Weapon 아이템 (Melee, Range 등)
+            else
             {
-                weaponBase = WeaponFactory.CreateWeapon(
-                    data,
-                    GameManager.instance.pool,
-                    scanner,
-                    playerSetup.transform
-                );
+                // Scanner를 PlayerSetup에서 가져오기
+                Scanner scanner = playerSetup.GetComponent<Scanner>();
+                if (level == 0)
+                {
+                    weaponBase = WeaponFactory.CreateWeapon(
+                        data,
+                        GameManager.instance.pool,
+                        scanner,
+                        playerSetup.transform
+                    );
+                }
+                else if (weaponBase != null && level<data.damages.Length)
+                {
+                    float nextDamage = data.baseDamage * data.damages[level];
+                    int nextCount = level < data.counts.Length ? data.counts[level] : 0;
+                    weaponBase.LevelUp(nextDamage, nextCount);
+                }
             }
-            else if (weaponBase != null)
-            {
-                float nextDamage = data.baseDamage * data.damages[level];
-                int nextCount = data.counts[level];
-                weaponBase.LevelUp(nextDamage, nextCount);
-            }
-        }
 
-        level++;
+            level++;
+        }
     }
 }

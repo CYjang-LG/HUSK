@@ -24,9 +24,14 @@ public class PoolManager : MonoBehaviour
     
     public GameObject Get(int index)
     {
-        GameObject select = null;
 
-        // 선택한 풀의 놀고(비활성) 있는 게임오브젝트 접근, 발견하면 select 변수에 할당
+        if(index<0 || index >= pools.Length)
+        {
+            Debug.LogError($"PollManager: 잘못된 인덱스{index}, 최대값: {pools.Length-1}");
+            return null;
+        }
+
+        GameObject select = null;
 
         //foreach 배열 리스트의 데이터를 순차적으로 접근
         foreach(GameObject item in pools[index])
