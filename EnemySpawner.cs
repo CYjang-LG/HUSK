@@ -2,7 +2,8 @@ using UnityEngine;
 
 /// <summary>
 /// 적 스폰을 관리하는 통합 스포너 시스템
-/// 기존 Spawner.cs + 보스 스테이지 지원 기능 추가
+/// GameManager의 gameTime/maxGameTime을 참조하여 스폰 타이밍 동기화
+/// 보스 스테이지 지원 기능 포함
 /// </summary>
 public class EnemySpawner : MonoBehaviour
 {
@@ -10,20 +11,17 @@ public class EnemySpawner : MonoBehaviour
     public Transform[] spawnPoints;
 
     [Header("=== 스폰 설정 ===")]
-    public SpawnData[] spawnData; // 기본 배열 (일반 스테이지용)
-    public EnemySpawnProfile spawnProfile; // ScriptableObject 프로필 (선택사항)
-    
+    public SpawnData[] spawnData;                // 일반 스테이지용 데이터
+    public EnemySpawnProfile spawnProfile;       // ScriptableObject 프로필 (선택사항)
+
     [Header("=== 보스 스테이지 ===")]
-    public EnemySpawnProfile[] bossSpawnProfiles; // 보스 스테이지 프로필 (6개)
+    public EnemySpawnProfile[] bossSpawnProfiles; // 보스 스테이지별 프로필 (6개)
     public bool isBossStage = false;
 
     [Header("=== 스폰 제한 ===")]
     public int maxEnemiesOnScreen = 50;
-    public float minSpawnDistance = 2f; // 플레이어로부터 최소 거리
+    public float minSpawnDistance = 2f;          // 플레이어로부터 최소 거리
 
-    [Header("=== 스테이지 설정 ===")]
-    public float stageTimeLimit = 180f; // 3분 = 180초
-    
     // 내부 변수
     private float levelDuration;
     private int currentLevel;
@@ -46,73 +44,51 @@ public class EnemySpawner : MonoBehaviour
         if (!GameManager.instance.isLive) return;
 
         UpdateEnemyCount();
-        
+
         if (isBossStage)
-        {
             HandleBossStage();
-        }
         else
-        {
             HandleNormalStage();
-        }
     }
 
     #region 초기화
     private void InitializeSpawner()
     {
-        // 스폰 포인트 자동 검색
         if (spawnPoints == null || spawnPoints.Length == 0)
-        {
             spawnPoints = GetComponentsInChildren<Transform>();
-        }
 
-        // 기본 스폰 데이터 생성
         if (spawnData == null || spawnData.Length == 0)
-        {
             CreateDefaultSpawnData();
-        }
     }
 
     private void SetupStageData()
     {
-        // StageManager에서 현재 스테이지 정보 가져오기
         if (StageManager.instance != null)
         {
             int currentStage = StageManager.instance.GetCurrentStageIndex();
-            isBossStage = (currentStage + 1) % 5 == 0; // 5, 10, 15, 20, 25, 30단계
-            
+            isBossStage = (currentStage + 1) % 5 == 0;
+
             if (isBossStage && bossSpawnProfiles != null)
             {
-                int bossIndex = (currentStage + 1) / 5 - 1; // 0~5 인덱스
+                int bossIndex = (currentStage + 1) / 5 - 1;
                 if (bossIndex < bossSpawnProfiles.Length)
-                {
                     spawnProfile = bossSpawnProfiles[bossIndex];
-                }
             }
         }
 
-        // SpawnProfile이 설정되어 있으면 우선 사용
         if (spawnProfile != null && spawnProfile.levelSpawnData != null)
-        {
             spawnData = spawnProfile.levelSpawnData;
-        }
 
-        // 레벨 지속시간 계산
         if (GameManager.instance != null)
-        {
-            levelDuration = stageTimeLimit / spawnData.Length;
-        }
+            levelDuration = GameManager.instance.maxGameTime / spawnData.Length;
         else
-        {
-            levelDuration = 30f; // 기본값
-        }
+            levelDuration = 30f;
 
         Debug.Log($"EnemySpawner 초기화: 보스스테이지={isBossStage}, 레벨지속시간={levelDuration}초");
     }
 
     private void CreateDefaultSpawnData()
     {
-        // 기본 스폰 데이터 생성
         spawnData = new SpawnData[]
         {
             new SpawnData { spriteType = 0, health = 50, speed = 1f, spawnTime = 3f, maxEnemiesPerWave = 2 },
@@ -137,64 +113,50 @@ public class EnemySpawner : MonoBehaviour
 
         timer += Time.deltaTime;
 
-        // 현재 레벨 계산 (시간 기반)
         currentLevel = Mathf.Min(
             Mathf.FloorToInt(GameManager.instance.gameTime / levelDuration),
             spawnData.Length - 1
         );
 
-        // 스폰 타이밍 체크
         SpawnData currentSpawnData = spawnData[currentLevel];
         if (timer >= currentSpawnData.spawnTime)
         {
             timer = 0f;
-
-            // 여러 마리 스폰
             int spawnCount = Mathf.Min(currentSpawnData.maxEnemiesPerWave,
-                maxEnemiesOnScreen - currentEnemyCount);
-
+                                       maxEnemiesOnScreen - currentEnemyCount);
             for (int i = 0; i < spawnCount; i++)
-            {
                 SpawnEnemy(currentSpawnData);
-            }
         }
     }
 
     private void HandleBossStage()
     {
-        // 보스가 아직 스폰되지 않았다면 스폰
-        if (!bossSpawned && GameManager.instance.gameTime > 1f) // 1초 후 보스 스폰
+        if (!bossSpawned && GameManager.instance.gameTime > 1f)
         {
             SpawnBoss();
             bossSpawned = true;
         }
-
-        // 보스 스테이지에서도 일반 적들을 소량 스폰 (선택적)
+        // 보스 스폰 후에도 일반 적 소량 스폰 여부
         if (spawnProfile != null && spawnProfile.spawnMinionsInBossStage)
-        {
-            HandleNormalStage(); // 일반 스폰 로직 사용
-        }
+            HandleNormalStage();
     }
     #endregion
 
     #region 적 생성
     private void SpawnEnemy(SpawnData data)
     {
-        Vector3 spawnPosition = GetValidSpawnPosition();
-        if (spawnPosition == Vector3.zero) return;
+        Vector3 pos = GetValidSpawnPosition();
+        if (pos == Vector3.zero) return;
 
-        // 오브젝트 풀에서 적 가져오기
-        GameObject enemyGO = GameManager.instance.pool.Get(0); // 0: Enemy prefab index
+        GameObject enemyGO = GameManager.instance.pool.Get(0);
         if (enemyGO == null) return;
 
-        enemyGO.transform.position = spawnPosition;
+        enemyGO.transform.position = pos;
 
-        // EnemyController 컴포넌트 초기화
         EnemyController enemy = enemyGO.GetComponent<EnemyController>();
         if (enemy != null)
         {
-            // 난이도에 따른 스탯 조정
-            SpawnData adjustedData = new SpawnData
+            SpawnData adj = new SpawnData
             {
                 spriteType = data.spriteType,
                 health = Mathf.RoundToInt(data.health * data.difficultyMultiplier),
@@ -202,8 +164,7 @@ public class EnemySpawner : MonoBehaviour
                 spawnTime = data.spawnTime,
                 maxEnemiesPerWave = data.maxEnemiesPerWave
             };
-
-            enemy.Initialize(adjustedData);
+            enemy.Initialize(adj);
         }
     }
 
@@ -215,34 +176,24 @@ public class EnemySpawner : MonoBehaviour
             return;
         }
 
-        Vector3 bossSpawnPos = GetValidSpawnPosition();
-        if (bossSpawnPos == Vector3.zero)
-        {
-            // 보스는 중앙에 강제 스폰
-            bossSpawnPos = new Vector3(0, 2, 0);
-        }
+        Vector3 pos = GetValidSpawnPosition();
+        if (pos == Vector3.zero)
+            pos = new Vector3(0, 2, 0);
 
-        // 보스 전용 프리팹 사용 (PoolManager에서 인덱스 1로 가정)
-        GameObject bossGO = GameManager.instance.pool.Get(1); // 1: Boss prefab index
+        GameObject bossGO = GameManager.instance.pool.Get(1);
         if (bossGO == null) return;
 
-        bossGO.transform.position = bossSpawnPos;
+        bossGO.transform.position = pos;
 
-        // 보스 초기화
-        EnemyController bossEnemy = bossGO.GetComponent<EnemyController>();
-        if (bossEnemy != null)
+        EnemyController boss = bossGO.GetComponent<EnemyController>();
+        if (boss != null)
         {
-            bossEnemy.Initialize(spawnProfile.bossSpawnData);
-            bossEnemy.SetAsBoss(true); // 보스 플래그 설정
+            boss.Initialize(spawnProfile.bossSpawnData);
+            boss.SetAsBoss(true);
         }
 
-        Debug.Log($"보스 스폰 완료: {spawnProfile.bossSpawnData.spriteType}번 보스");
-
-        // GameManager에 보스 스폰 알림
-        if (GameManager.instance != null)
-        {
-            GameManager.instance.OnBossSpawned();
-        }
+        Debug.Log($"보스 스폰 완료");
+        GameManager.instance.OnBossSpawned();
     }
     #endregion
 
@@ -250,36 +201,21 @@ public class EnemySpawner : MonoBehaviour
     private Vector3 GetValidSpawnPosition()
     {
         if (spawnPoints.Length <= 1) return Vector3.zero;
-
         Vector3 playerPos = GameManager.instance.player.transform.position;
 
-        // 최대 10번 시도
-        for (int attempts = 0; attempts < 10; attempts++)
+        for (int i = 1; i < spawnPoints.Length; i++)
         {
-            // 랜덤 스폰 포인트 선택 (0은 자신이므로 1부터)
-            int randomIndex = Random.Range(1, spawnPoints.Length);
-            Vector3 candidatePos = spawnPoints[randomIndex].position;
-
-            // 플레이어와의 거리 체크
-            float distance = Vector3.Distance(candidatePos, playerPos);
-            if (distance >= minSpawnDistance)
-            {
-                return candidatePos;
-            }
+            Vector3 candidate = spawnPoints[Random.Range(1, spawnPoints.Length)].position;
+            if (Vector3.Distance(candidate, playerPos) >= minSpawnDistance)
+                return candidate;
         }
-
-        // 적절한 위치를 찾지 못한 경우 첫 번째 스폰 포인트 사용
         return spawnPoints.Length > 1 ? spawnPoints[1].position : Vector3.zero;
     }
 
     public void ClearAllEnemies()
     {
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-        foreach (GameObject enemy in enemies)
-        {
-            enemy.SetActive(false);
-        }
-        
+        foreach (GameObject e in GameObject.FindGameObjectsWithTag("Enemy"))
+            e.SetActive(false);
         currentEnemyCount = 0;
         Debug.Log("모든 적 제거 완료");
     }
@@ -288,26 +224,17 @@ public class EnemySpawner : MonoBehaviour
     {
         spawnProfile = profile;
         if (profile != null && profile.levelSpawnData != null)
-        {
             spawnData = profile.levelSpawnData;
-        }
     }
 
-    public void SetBossStage(bool isBoss)
+    public void SetBossStage(bool boss)
     {
-        isBossStage = isBoss;
-        bossSpawned = false; // 보스 스폰 상태 리셋
+        isBossStage = boss;
+        bossSpawned = false;
     }
 
-    public int GetCurrentEnemyCount()
-    {
-        return currentEnemyCount;
-    }
-
-    public bool IsBossStage()
-    {
-        return isBossStage;
-    }
+    public int GetCurrentEnemyCount() => currentEnemyCount;
+    public bool IsBossStage() => isBossStage;
     #endregion
 
     #region 디버그
@@ -316,26 +243,20 @@ public class EnemySpawner : MonoBehaviour
         if (spawnPoints == null) return;
 
         Gizmos.color = Color.red;
-        for (int i = 1; i < spawnPoints.Length; i++) // 0은 자신이므로 스킵
+        for (int i = 1; i < spawnPoints.Length; i++)
         {
             if (spawnPoints[i] != null)
             {
                 Gizmos.DrawWireSphere(spawnPoints[i].position, 0.5f);
-
-                // 플레이어와의 최소 거리 표시
-                if (Application.isPlaying && GameManager.instance != null)
-                {
-                    Gizmos.color = Color.yellow;
-                    Gizmos.DrawWireSphere(spawnPoints[i].position, minSpawnDistance);
-                    Gizmos.color = Color.red;
-                }
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawWireSphere(spawnPoints[i].position, minSpawnDistance);
+                Gizmos.color = Color.red;
             }
         }
 
-        // 보스 스테이지 표시
         if (isBossStage)
         {
-            Gizmos.color = Color.purple;
+            Gizmos.color = Color.magenta;
             Gizmos.DrawWireCube(transform.position, Vector3.one * 2);
         }
     }
