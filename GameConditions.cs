@@ -1,9 +1,9 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "GameConditions", menuName = "Game/Game Conditions")]
-public class GameConditions : MonoBehaviour
+public class GameConditions : ScriptableObject
 {
-    [Header("½Â¸®Á¶°Ç(or)")]
+    [Header("승리조건(or)")]
     public bool useTimeLimit = true;
     public float timeLimit = 300f;
 
@@ -13,9 +13,8 @@ public class GameConditions : MonoBehaviour
     public bool useBossKill = false;
     public string bossTag = "Boss";
 
-    [Header("ÆÐ¹èÁ¶°Ç")]
+    [Header("패배조건")]
     public bool useHealthZero = true;
     public bool useMaxEnemies = false;
     public int maxEnemiesOnScreen = 100;
-
 }
