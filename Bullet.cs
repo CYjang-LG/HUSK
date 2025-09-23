@@ -1,32 +1,43 @@
+// Bullet.cs (변경 없음)
 using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    private const int OrbitPierceSentinel = -100;
     public float damage;
-    public int pierce;
     private Rigidbody2D rb;
 
-    void Awake() => rb = GetComponent<Rigidbody2D>();
-
-    public void Init(float dmg, int p, Vector3 dir, float speed)
+    void Awake()
     {
-        damage = dmg; pierce = p;
-        rb.linearVelocity = (p >= 0) ? dir * speed : Vector2.zero;
+        rb = GetComponent<Rigidbody2D>();
     }
 
-    public void SetDamage(float d) => damage = d;
-
-    void OnTriggerEnter2D(Collider2D c)
+    void OnEnable()
     {
-        if (!c.CompareTag("Enemy") || pierce == OrbitPierceSentinel) return;
-        pierce--;
-        if (pierce < 0) { rb.linearVelocity = Vector2.zero; gameObject.SetActive(false); }
+        Invoke(nameof(Deactivate), 5f);
     }
 
-    void OnTriggerExit2D(Collider2D c)
+    void OnDisable()
     {
-        if (!c.CompareTag("Area") || pierce == OrbitPierceSentinel) return;
+        CancelInvoke();
+    }
+
+    private void Deactivate()
+    {
         gameObject.SetActive(false);
+    }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Enemy"))
+        {
+            var enemy = collision.GetComponent<EnemyController>();
+            if (enemy != null)
+                enemy.TakeDamage(damage);
+            gameObject.SetActive(false);
+        }
+        else if (!collision.CompareTag("Player"))
+        {
+            gameObject.SetActive(false);
+        }
     }
 }
