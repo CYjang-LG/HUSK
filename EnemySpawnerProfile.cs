@@ -4,7 +4,7 @@ using UnityEngine;
 public class EnemySpawnProfile : ScriptableObject
 {
     [Header("Profile Info")]
-    public string profileName;                // �߰��� �ʵ�
+    public string profileName;                // Ãß°¡µÈ ÇÊµå
 
     [Header("Spawn Data")]
     public SpawnData[] levelSpawnData;
