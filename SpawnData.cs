@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 
 /// <summary>
-/// ½ºÆù µ¥ÀÌÅÍ Á¤ÀÇ
+/// Â½ÂºÃ†Ã¹ ÂµÂ¥Ã€ÃŒÃ…Ã ÃÂ¤Ã€Ã‡
 /// </summary>
 [System.Serializable]
 public class SpawnData
