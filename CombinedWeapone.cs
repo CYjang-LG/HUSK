@@ -13,15 +13,26 @@ public class CombinedWeapon : WeaponBase
     public FireMode fireMode = FireMode.Straight;
     public GameObject projectilePrefab;
     public Transform firePoint;
-    
+
     [Header("=== Straight 모드 설정 ===")]
     public float straightSpeed = 10f;
-    
+
     [Header("=== Orbit 모드 설정 ===")]
     public float orbitRadius = 1.5f;
     private float orbitAngle = 0f;
 
     private Coroutine fireRoutine;
+
+    void Awake()
+    {
+        if (firePoint == null)
+        {
+            GameObject firePointObj = new GameObject("FirePoint");
+            firePointObj.transform.SetParent(transform);
+            firePointObj.transform.localPosition = Vector3.right * 0.5f;
+            firePoint = firePointObj.transform;
+        }
+    }
 
     public override float Speed
     {
@@ -35,12 +46,14 @@ public class CombinedWeapon : WeaponBase
         }
     }
 
-    public override void Init(ItemData data, PoolManager pool, int prefabId, Scanner scanner, float damageMul, int extraCount)
+    public override void Init(ItemData data, PoolManager pool, int prefabId, UtilityManager utility, float damageMul, int extraCount)
     {
-        base.Init(data, pool, prefabId, scanner, damageMul, extraCount);
+        base.Init(data, pool, prefabId, utility, damageMul, extraCount);
         projectilePrefab = data.projectile;
         damage = data.baseDamage * damageMul;
         count = data.baseCount + extraCount;
+
+        StartFiring();
     }
 
     public override void LevelUp(float nextDamage, int addCount)
@@ -68,10 +81,13 @@ public class CombinedWeapon : WeaponBase
     {
         while (true)
         {
-            if (fireMode == FireMode.Straight)
-                FireStraight();
-            else
-                FireOrbit();
+            if (GameManager.instance != null && GameManager.instance.isLive)
+            {
+                if (fireMode == FireMode.Straight)
+                    FireStraight();
+                else
+                    FireOrbit();
+            }
 
             yield return new WaitForSeconds(fireInterval);
         }
@@ -79,14 +95,20 @@ public class CombinedWeapon : WeaponBase
 
     private void FireStraight()
     {
+        if (pool == null || prefabId >= pool.prefabs.Length || firePoint == null) return;
+
         for (int i = 0; i < count; i++)
         {
             GameObject proj = pool.Get(prefabId);
+            if (proj == null) continue;
+
             proj.transform.position = firePoint.position;
             proj.transform.rotation = firePoint.rotation;
+
             var rb = proj.GetComponent<Rigidbody2D>();
             if (rb != null)
-                rb.velocity = firePoint.right * straightSpeed;
+                rb.linearVelocity = firePoint.right * straightSpeed;
+
             var bullet = proj.GetComponent<Bullet>();
             if (bullet != null)
                 bullet.damage = damage;
@@ -95,6 +117,8 @@ public class CombinedWeapon : WeaponBase
 
     private void FireOrbit()
     {
+        if (pool == null || prefabId >= pool.prefabs.Length || firePoint == null) return;
+
         orbitAngle += orbitSpeed * Time.deltaTime;
         for (int i = 0; i < count; i++)
         {
@@ -103,9 +127,13 @@ public class CombinedWeapon : WeaponBase
                 Mathf.Cos(angle * Mathf.Deg2Rad),
                 Mathf.Sin(angle * Mathf.Deg2Rad),
                 0f) * orbitRadius;
+
             GameObject proj = pool.Get(prefabId);
+            if (proj == null) continue;
+
             proj.transform.position = firePoint.position + offset;
             proj.transform.rotation = Quaternion.Euler(0, 0, angle);
+
             var bullet = proj.GetComponent<Bullet>();
             if (bullet != null)
                 bullet.damage = damage;

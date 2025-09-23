@@ -12,65 +12,66 @@ public class EnemyController : MonoBehaviour
     public float health;
     public float maxHealth;
     public float jumpForce = 5f;
-    
+
     [Header("=== AI 설정 ===")]
     public float attackRange = 1.5f;
     public float jumpTriggerDistance = 3f;
     public float detectionRange = 10f;
     private float jumpCooldown = 2f;
     private float lastJumpTime;
-    
+    private bool isBoss = false;
+
     [Header("=== 애니메이션 ===")]
     public RuntimeAnimatorController[] animControllers;
-    
+
     [Header("=== 지면 체크 ===")]
     public Transform groundCheck;
     public LayerMask groundLayer;
     private bool isGrounded;
     private float groundCheckRadius = 0.2f;
-    
+
     // 타겟 및 상태
     public Rigidbody2D target;
     private bool isLive;
     private bool isFollowing;
-    
+
     // 컴포넌트 참조
     private Rigidbody2D rigid;
     private Collider2D coll;
     private Animator anim;
     private SpriteRenderer spriteRenderer;
     private WaitForFixedUpdate wait;
-    
+
     void Awake()
     {
         InitializeComponents();
     }
-    
+
     void Update()
     {
         if (!GameManager.instance.isLive || !isLive) return;
-        
+
         CheckGrounded();
         HandleAI();
     }
-    
+
     void FixedUpdate()
     {
         if (!GameManager.instance.isLive || !isLive || target == null) return;
-        
+
         if (anim != null && anim.GetCurrentAnimatorStateInfo(0).IsName("Hit"))
             return;
-            
+
         HandleMovement();
     }
-    
+
     void LateUpdate()
     {
         if (!GameManager.instance.isLive || target == null) return;
-        
+
         UpdateVisuals();
     }
-    
+
     #region 초기화
     private void InitializeComponents()
     {
@@ -79,11 +80,14 @@ public class EnemyController : MonoBehaviour
         anim = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         wait = new WaitForFixedUpdate();
-        
+
         // 물리 설정
-        rigid.gravityScale = 2f;
-        rigid.freezeRotation = true;
-        
+        if (rigid != null)
+        {
+            rigid.gravityScale = 2f;
+            rigid.freezeRotation = true;
+        }
+
         // Ground Check 생성
         if (groundCheck == null)
         {
@@ -94,48 +98,51 @@ public class EnemyController : MonoBehaviour
         }
     }
     #endregion
-    
+
     #region AI 시스템
     private void HandleAI()
     {
         if (target == null) return;
-        
+
         float distanceToPlayer = Vector2.Distance(transform.position, target.position);
-        
+
         // 감지 범위 체크
         isFollowing = distanceToPlayer <= detectionRange;
-        
+
         // 점프 로직
         if (isFollowing && ShouldJump(distanceToPlayer))
         {
             Jump();
         }
     }
-    
+
     private bool ShouldJump(float distanceToPlayer)
     {
         if (!isGrounded || Time.time - lastJumpTime <= jumpCooldown)
             return false;
-            
+
         float heightDifference = target.position.y - transform.position.y;
         return heightDifference > 1f && distanceToPlayer < jumpTriggerDistance;
     }
-    
+
     private void Jump()
     {
-        rigid.linearVelocity = new Vector2(rigid.linearVelocity.x, jumpForce);
-        lastJumpTime = Time.time;
+        if (rigid != null)
+        {
+            rigid.linearVelocity = new Vector2(rigid.linearVelocity.x, jumpForce);
+            lastJumpTime = Time.time;
+        }
     }
     #endregion
-    
+
     #region 이동 시스템
     private void HandleMovement()
     {
-        if (!isFollowing) return;
-        
+        if (!isFollowing || rigid == null) return;
+
         Vector2 direction = GetDirectionToTarget();
         float distance = Mathf.Abs(target.position.x - rigid.position.x);
-        
+
         // 공격 범위 밖이면 이동
         if (distance > attackRange)
         {
@@ -143,12 +150,12 @@ public class EnemyController : MonoBehaviour
             rigid.MovePosition(new Vector2(rigid.position.x + nextPosition.x, rigid.position.y));
         }
     }
-    
+
     private Vector2 GetDirectionToTarget()
     {
         return new Vector2(target.position.x - rigid.position.x, 0).normalized;
     }
-    
+
     private void CheckGrounded()
     {
         if (groundCheck != null)
@@ -157,22 +164,25 @@ public class EnemyController : MonoBehaviour
         }
     }
     #endregion
-    
+
     #region 시각적 업데이트
     private void UpdateVisuals()
     {
-        // 스프라이트 방향 설정
-        spriteRenderer.flipX = target.position.x < rigid.position.x;
+        if (spriteRenderer != null)
+        {
+            // 스프라이트 방향 설정
+            spriteRenderer.flipX = target.position.x < rigid.position.x;
+        }
     }
     #endregion
-    
+
     #region 생명주기 관리
     private void OnEnable()
     {
         SetTarget();
         ResetState();
     }
-    
+
     private void SetTarget()
     {
         if (GameManager.instance?.player != null)
@@ -180,20 +190,20 @@ public class EnemyController : MonoBehaviour
             target = GameManager.instance.player.GetComponent<Rigidbody2D>();
         }
     }
-    
+
     private void ResetState()
     {
         isLive = true;
-        coll.enabled = true;
-        rigid.simulated = true;
-        spriteRenderer.sortingOrder = 2;
-        
+        if (coll != null) coll.enabled = true;
+        if (rigid != null) rigid.simulated = true;
+        if (spriteRenderer != null) spriteRenderer.sortingOrder = 2;
+
         if (anim != null)
             anim.SetBool("Dead", false);
-            
+
         health = maxHealth;
     }
-    
+
     public void Initialize(SpawnData data)
     {
         // 애니메이터 설정
@@ -201,97 +211,116 @@ public class EnemyController : MonoBehaviour
         {
             anim.runtimeAnimatorController = animControllers[data.spriteType];
         }
-        
+
         // 스탯 설정
         speed = data.speed;
         maxHealth = data.health;
         health = data.health;
-        
+
         Debug.Log($"적 초기화: Type={data.spriteType}, HP={health}, Speed={speed}");
     }
+
+    public void SetAsBoss(bool boss)
+    {
+        isBoss = boss;
+        if (isBoss)
+        {
+            transform.localScale = Vector3.one * 1.5f; // 보스는 크게
+        }
+    }
     #endregion
-    
+
     #region 전투 시스템
     void OnTriggerEnter2D(Collider2D collision)
     {
         if (!collision.CompareTag("Bullet")) return;
-        
+
         Bullet bullet = collision.GetComponent<Bullet>();
         if (bullet != null)
         {
             TakeDamage(bullet.damage);
         }
     }
-    
+
     public void TakeDamage(float damage)
     {
         health -= damage;
         StartCoroutine(KnockBack());
-        
+
         if (health > 0)
         {
             if (anim != null)
                 anim.SetTrigger("Hit");
-            AudioManager.instance?.PlaySfx(AudioManager.Sfx.Hit);
+            if (AudioManager.instance != null)
+                AudioManager.instance.PlaySfx(AudioManager.Sfx.Hit);
         }
         else
         {
             Die();
         }
     }
-    
+
     private void Die()
     {
         isLive = false;
-        coll.enabled = false;
-        rigid.simulated = false;
-        spriteRenderer.sortingOrder = 1;
-        
+        if (coll != null) coll.enabled = false;
+        if (rigid != null) rigid.simulated = false;
+        if (spriteRenderer != null) spriteRenderer.sortingOrder = 1;
+
         if (anim != null)
             anim.SetBool("Dead", true);
-            
+
+        // 보스 사망 처리
+        if (isBoss && GameManager.instance != null)
+        {
+            GameManager.instance.OnBossKilled();
+        }
+
         // GameManager 업데이트
-        GameManager.instance.kill++;
-        GameManager.instance.GetExp();
-        
-        if (GameManager.instance.isLive)
-            AudioManager.instance?.PlaySfx(AudioManager.Sfx.Dead);
+        if (GameManager.instance != null)
+        {
+            GameManager.instance.kill++;
+            GameManager.instance.GetExp();
+        }
+
+        if (GameManager.instance != null && GameManager.instance.isLive && AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.Sfx.Dead);
     }
-    
+
     private IEnumerator KnockBack()
     {
         yield return wait;
-        
-        if (GameManager.instance.player != null)
+
+        if (GameManager.instance != null && GameManager.instance.player != null && rigid != null)
         {
             Vector3 playerPos = GameManager.instance.player.transform.position;
             Vector3 directionFromPlayer = transform.position - playerPos;
             rigid.AddForce(directionFromPlayer.normalized * 3, ForceMode2D.Impulse);
         }
     }
-    
+
     // 애니메이션 이벤트에서 호출
     private void OnDeathAnimationComplete()
     {
         gameObject.SetActive(false);
     }
     #endregion
-    
+
     #region 디버그
     void OnDrawGizmosSelected()
     {
         // 감지 범위
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, detectionRange);
-        
+
         // 공격 범위
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);
-        
+
         // 점프 트리거 범위
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, jumpTriggerDistance);
-        
+
         // Ground Check
         if (groundCheck != null)
         {

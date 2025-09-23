@@ -9,8 +9,8 @@ public class GameManager : MonoBehaviour
     [Header("# Game Control")]
     public bool isLive;
     public float gameTime;
-    public float maxGameTime = 20f; // 🔥 maxGameTime 필드 추가
-    public GameConditions gameConditions; // 게임 조건 설정
+    public float maxGameTime = 20f;
+    public GameConditions gameConditions;
 
     [Header("# Player Info")]
     public int playerId;
@@ -22,16 +22,16 @@ public class GameManager : MonoBehaviour
     public int[] nextExp = { 10, 30, 60, 100, 150, 210, 280, 360, 450, 600 };
 
     [Header("# Game Object")]
-    public PlayerSetup player;
+    public GameObject player;
     public PoolManager pool;
-    public LevelUp uiLevelUp;
-    public Result uiResult;
+    public GameObject uiLevelUp;
+    public GameObject uiResult;
     public GameObject enemyCleaner;
 
     [Header("# Stage System")]
-    public StageManager stageManager; // 스테이지 매니저 참조
+    public StageManager stageManager;
 
-    private Health playerHealth;
+    private PlayerController playerController;
     private bool bossKilled = false;
 
     void Awake()
@@ -56,25 +56,30 @@ public class GameManager : MonoBehaviour
 
         if (player != null)
         {
-            playerHealth = player.GetComponent<Health>();
-            if (playerHealth != null)
+            playerController = player.GetComponent<PlayerController>();
+            if (playerController != null)
             {
-                maxHealth = playerHealth.maxHealth;
+                maxHealth = playerController.maxHealth;
                 health = maxHealth;
             }
         }
 
-        player.gameObject.SetActive(true);
+        if (player != null)
+            player.SetActive(true);
 
-        // 안전한 배열 접근
-        if (playerId >= 0 && playerId < 2)
-            uiLevelUp.Select(playerId);
-        else
-            uiLevelUp.Select(0);
+        // UI 레벨업 설정 (UIManager 컴포넌트가 있으면)
+        var uiManager = FindFirstObjectByType<UIManager>();
+        if (uiManager != null && playerId >= 0 && playerId < 2)
+        {
+            // UIManager에서 처리
+        }
 
         Resume();
-        AudioManager.instance.PlayBgm(true);
-        AudioManager.instance.PlaySfx(AudioManager.Sfx.Select);
+        if (AudioManager.instance != null)
+        {
+            AudioManager.instance.PlayBgm(true);
+            AudioManager.instance.PlaySfx(AudioManager.Sfx.Select);
+        }
     }
 
     void Update()
@@ -84,8 +89,8 @@ public class GameManager : MonoBehaviour
         gameTime += Time.deltaTime;
 
         // Health 동기화
-        if (playerHealth != null)
-            health = playerHealth.currentHealth;
+        if (playerController != null)
+            health = playerController.currentHealth;
 
         // 승리 조건 체크 (기본 시간 제한)
         if (gameTime >= maxGameTime)
@@ -145,9 +150,15 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void OnBossSpawned()
+    {
+        Debug.Log("보스가 스폰되었습니다!");
+    }
+
     public void OnBossKilled()
     {
         bossKilled = true;
+        Debug.Log("보스가 처치되었습니다!");
     }
 
     public void GameOver()
@@ -160,12 +171,24 @@ public class GameManager : MonoBehaviour
         isLive = false;
         yield return new WaitForSeconds(0.5f);
 
-        uiResult.gameObject.SetActive(true);
-        uiResult.Lose();
+        // UIManager를 통한 결과 표시
+        var uiManager = FindFirstObjectByType<UIManager>();
+        if (uiManager != null)
+        {
+            uiManager.ShowGameResult(false);
+        }
+        else if (uiResult != null)
+        {
+            uiResult.SetActive(true);
+        }
+
         Stop();
 
-        AudioManager.instance.PlayBgm(false);
-        AudioManager.instance.PlaySfx(AudioManager.Sfx.Lose);
+        if (AudioManager.instance != null)
+        {
+            AudioManager.instance.PlayBgm(false);
+            AudioManager.instance.PlaySfx(AudioManager.Sfx.Lose);
+        }
     }
 
     public void GameVictory()
@@ -176,11 +199,12 @@ public class GameManager : MonoBehaviour
     IEnumerator GameVictoryRoutine()
     {
         isLive = false;
-        enemyCleaner.SetActive(true);
+        if (enemyCleaner != null)
+            enemyCleaner.SetActive(true);
 
         yield return new WaitForSeconds(0.5f);
 
-        // 🔥 StageManager가 있으면 스테이지 클리어 처리, 없으면 기본 승리 UI
+        // StageManager가 있으면 스테이지 클리어 처리
         if (stageManager != null)
         {
             stageManager.OnGameVictory();
@@ -188,13 +212,23 @@ public class GameManager : MonoBehaviour
         else
         {
             // 기본 승리 처리
-            uiResult.gameObject.SetActive(true);
-            uiResult.Win();
+            var uiManager = FindFirstObjectByType<UIManager>();
+            if (uiManager != null)
+            {
+                uiManager.ShowGameResult(true);
+            }
+            else if (uiResult != null)
+            {
+                uiResult.SetActive(true);
+            }
             Stop();
         }
 
-        AudioManager.instance.PlayBgm(false);
-        AudioManager.instance.PlaySfx(AudioManager.Sfx.Win);
+        if (AudioManager.instance != null)
+        {
+            AudioManager.instance.PlayBgm(false);
+            AudioManager.instance.PlaySfx(AudioManager.Sfx.Win);
+        }
     }
 
     public void GameRetry()
@@ -212,7 +246,17 @@ public class GameManager : MonoBehaviour
         {
             level++;
             exp = 0;
-            uiLevelUp.Show();
+
+            // UIManager를 통한 레벨업 표시
+            var uiManager = FindFirstObjectByType<UIManager>();
+            if (uiManager != null)
+            {
+                uiManager.ShowLevelUp();
+            }
+            else if (uiLevelUp != null)
+            {
+                uiLevelUp.SetActive(true);
+            }
         }
     }
 

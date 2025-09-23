@@ -7,7 +7,7 @@ public class AchievementManager : MonoBehaviour
     public GameObject[] lockCharacter;
     public GameObject[] unlockCharacter;
     public GameObject uiNotice;
-    
+
     enum Achievement { UnlockPotato, UnlockBean }
     Achievement[] achievements;
     WaitForSecondsRealtime wait;
@@ -94,12 +94,12 @@ public class AchievementManager : MonoBehaviour
     {
         if (uiNotice != null)
             uiNotice.SetActive(true);
-        
+
         if (AudioManager.instance != null)
             AudioManager.instance.PlaySfx(AudioManager.Sfx.LevelUp);
-        
+
         yield return wait;
-        
+
         if (uiNotice != null)
             uiNotice.SetActive(false);
     }

@@ -50,15 +50,15 @@ public class StageManager : MonoBehaviour
             GameManager.instance.gameConditions = currentStage.gameConditions;
             GameManager.instance.stageManager = this;
 
-            // 🔥 스테이지의 시간 제한을 GameManager에 적용
+            // 스테이지의 시간 제한을 GameManager에 적용
             if (currentStage.gameConditions != null && currentStage.gameConditions.useTimeLimit)
             {
                 GameManager.instance.maxGameTime = currentStage.gameConditions.timeLimit;
             }
         }
 
-        // 🔥 Spawner에 스폰 데이터 적용 (수정된 부분)
-        Spawner spawner = FindFirstObjectByType<Spawner>();
+        // Spawner에 스폰 데이터 적용
+        EnemySpawner spawner = FindFirstObjectByType<EnemySpawner>();
         if (spawner != null)
         {
             // StageData의 GetSpawnData() 메서드 사용
@@ -68,17 +68,10 @@ public class StageManager : MonoBehaviour
                 spawner.spawnData = stageSpawnData;
                 Debug.Log($"Spawner에 {stageSpawnData.Length}개의 스폰 데이터 적용");
             }
-
-            // EnemySpawnProfile도 설정 (있다면)
-            if (currentStage.enemySpawnProfile != null)
-            {
-                spawner.spawnProfile = currentStage.enemySpawnProfile;
-                Debug.Log($"Spawner에 {currentStage.enemySpawnProfile.profileName} 프로필 적용");
-            }
         }
         else
         {
-            Debug.LogWarning("StageManager: Spawner를 찾을 수 없습니다!");
+            Debug.LogWarning("StageManager: EnemySpawner를 찾을 수 없습니다!");
         }
 
         // 배경 변경
@@ -113,12 +106,11 @@ public class StageManager : MonoBehaviour
         Debug.Log($"스테이지 초기화 완료: {currentStage.stageName}");
     }
 
-    // 🔥 특별 이벤트 코루틴 추가
     IEnumerator SpecialEventCoroutine()
     {
         yield return new WaitForSeconds(currentStage.specialEventTime);
 
-        if (GameManager.instance.isLive)
+        if (GameManager.instance != null && GameManager.instance.isLive)
         {
             TriggerSpecialEvent();
         }
@@ -129,14 +121,13 @@ public class StageManager : MonoBehaviour
         Debug.Log("특별 이벤트 발생!");
 
         // 보스 스폰
-        Spawner spawner = FindFirstObjectByType<Spawner>();
+        EnemySpawner spawner = FindFirstObjectByType<EnemySpawner>();
         if (spawner != null)
         {
             spawner.SpawnBoss();
         }
 
         // 추가 특별 이벤트들...
-        // 예: 무기 드랍, 체력 회복, 특수 효과 등
     }
 
     public void OnStageComplete()
@@ -169,7 +160,6 @@ public class StageManager : MonoBehaviour
         else
         {
             Debug.LogWarning("StageManager: stageCompleteUI가 설정되지 않았습니다!");
-            // UI 없이도 진행 가능하도록
             yield return new WaitForSeconds(3f);
             LoadNextStage();
         }
@@ -194,7 +184,7 @@ public class StageManager : MonoBehaviour
                 if (buttonText != null)
                 {
                     if (currentStage.nextStage != null)
-                        buttonText.text = $"다음 스테이지";
+                        buttonText.text = "다음 스테이지";
                     else
                         buttonText.text = "계속하기";
                 }
@@ -254,16 +244,6 @@ public class StageManager : MonoBehaviour
             if (nextStageButton != null)
                 nextStageButton.gameObject.SetActive(false);
         }
-
-        // 메인 메뉴로 돌아가기 (선택사항)
-        // StartCoroutine(ReturnToMainMenuAfterDelay(5f));
-    }
-
-    IEnumerator ReturnToMainMenuAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        // SceneManager.LoadScene("MainMenu"); // 메인 메뉴 씬 이름으로 변경
-        Debug.Log("메인 메뉴로 돌아갑니다...");
     }
 
     // GameManager에서 호출할 메서드
@@ -281,6 +261,11 @@ public class StageManager : MonoBehaviour
     public int GetCurrentStageNumber()
     {
         return currentStage != null ? currentStage.stageNumber : 0;
+    }
+
+    public int GetCurrentStageIndex()
+    {
+        return GetCurrentStageNumber() - 1;
     }
 
     // 스테이지 강제 변경 (디버그용)

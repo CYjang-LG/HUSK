@@ -253,19 +253,24 @@ public class UtilityManager : MonoBehaviour
         }
     }
     #endregion
-    
+
     #region 지면 감지 (Ground Detector)
-    public static bool CheckGroundAtPosition(Vector3 position, float radius = 0.2f, LayerMask groundLayer = 1)
+    public static bool CheckGroundAtPosition(Vector3 position, float radius = 0.2f, LayerMask groundLayer = default)
     {
+        if (groundLayer == default)
+            groundLayer = LayerMask.GetMask("Ground"); // "Ground" 레이어만 검사
+
         return Physics2D.OverlapCircle(position, radius, groundLayer);
     }
-    
-    public static RaycastHit2D GetGroundInfo(Vector3 position, float distance = 1f, LayerMask groundLayer = 1)
+    public static RaycastHit2D GetGroundInfo(Vector3 position, float distance = 1f, LayerMask groundLayer = default)
     {
+        if (groundLayer == default)
+            groundLayer = LayerMask.GetMask("Ground"); // "Ground" 레이어만 사용
+
         return Physics2D.Raycast(position, Vector2.down, distance, groundLayer);
     }
     #endregion
-    
+
     #region 헬스 관리 (정적 메서드로 제공)
     public static void ApplyDamage(GameObject target, float damage)
     {
