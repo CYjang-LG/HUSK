@@ -23,7 +23,7 @@ public class Gear : MonoBehaviour
     }
 
     /// <summary>
-    /// Àû¿ë ´ë»ó ¹«±âµé¿¡ º¯°æµÈ ¼Ó¼º Àû¿ë
+    /// ì ìš© ëŒ€ìƒ ë¬´ê¸°ë“¤ì— ë³€ê²½ëœ ì†ì„± ì ìš©
     /// </summary>
     void ApplyGear()
     {
@@ -34,19 +34,19 @@ public class Gear : MonoBehaviour
             case ItemData.ItemType.Glove:
                 foreach (var weapon in weapons)
                 {
-                    // È¸ÀüÇü/¹ß»çÇü ¸ğµÎ ´ëÀÀ
-                    if (weapon is OrbitWeapon) // ±ÙÁ¢ = È¸ÀüÇü
+                    // íšŒì „í˜•/ë°œì‚¬í˜• ëª¨ë‘ ëŒ€ì‘
+                    if (weapon is OrbitWeapon) // ê·¼ì ‘ = íšŒì „í˜•
                     {
                         weapon.Speed = 150f + (150f * rate);
                     }
-                    else if (weapon is ShooterWeapon) // ¿ø°Å¸®
+                    else if (weapon is ShooterWeapon) // ì›ê±°ë¦¬
                     {
                         weapon.Speed = 0.5f * (1f - rate);
                     }
                 }
                 break;
             case ItemData.ItemType.Shoe:
-                // ÇÃ·¹ÀÌ¾î ÀÌµ¿ ¼Óµµ Á¶Á¤
+                // í”Œë ˆì´ì–´ ì´ë™ ì†ë„ ì¡°ì •
                 var playerSetup = GameManager.instance.player;
                 if(playerSetup != null)
                 {
