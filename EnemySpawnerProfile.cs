@@ -4,7 +4,7 @@ using UnityEngine;
 public class EnemySpawnProfile : ScriptableObject
 {
     [Header("Profile Info")]
-    public string profileName;                // Ãß°¡µÈ ÇÊµå
+    public string profileName;         
 
     [Header("Spawn Data")]
     public SpawnData[] levelSpawnData;
@@ -14,3 +14,4 @@ public class EnemySpawnProfile : ScriptableObject
     public bool hasBoss = true;
     public bool spawnMinionsInBossStage = false;
 }
+
