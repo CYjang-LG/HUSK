@@ -3,12 +3,12 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "EnemySpawnProfile", menuName = "Game/Enemy Spawn Profile")]
 public class EnemySpawnProfile : ScriptableObject
 {
-    [Header("ìŠ¤í° í”„ë¡œí•„ ì •ë³´")]
-    public string profileName = "ê¸°ë³¸ ìŠ¤í°";
+    [Header("½ºÆù ÇÁ·ÎÇÊ Á¤º¸")]
+    public string profileName = "±âº» ½ºÆù";
     [TextArea(2, 4)]
-    public string description = "ê¸°ë³¸ì ì¸ ì  ìŠ¤í° ì„¤ì •";
+    public string description = "±âº»ÀûÀÎ Àû ½ºÆù ¼³Á¤";
 
-    [Header("ë ˆë²¨ë³„ ìŠ¤í° ë°ì´í„°")]
+    [Header("·¹º§º° ½ºÆù µ¥ÀÌÅÍ")]
     public SpawnData[] levelSpawnData = new SpawnData[]
     {
         new SpawnData { spriteType = 0, health = 50, speed = 1f, spawnTime = 3f },
@@ -18,7 +18,7 @@ public class EnemySpawnProfile : ScriptableObject
         new SpawnData { spriteType = 2, health = 200, speed = 2f, spawnTime = 1f }
     };
 
-    [Header("ë³´ìŠ¤ ìŠ¤í° ì„¤ì •")]
+    [Header("º¸½º ½ºÆù ¼³Á¤")]
     public bool hasBoss = false;
     public SpawnData bossSpawnData = new SpawnData { spriteType = 3, health = 500, speed = 0.8f, spawnTime = 60f };
 }

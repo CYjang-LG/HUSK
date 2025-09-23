@@ -3,15 +3,15 @@ using UnityEngine;
 [System.Serializable]
 public class SpawnData
 {
-    [Header("ì  ì™¸í˜•")]
+    [Header("Àû ¿ÜÇü")]
     public int spriteType = 0;
     public int health = 100;
     public float speed = 2f;
 
-    [Header("ìŠ¤í° íƒ€ì´ë°")]
-    public float spawnTime = 2f; // ìŠ¤í° ê°„ê²© (ì´ˆ)
+    [Header("½ºÆù Å¸ÀÌ¹Ö")]
+    public float spawnTime = 2f; // ½ºÆù °£°İ (ÃÊ)
 
-    [Header("ì¶”ê°€ ì„¤ì •")]
-    public int maxEnemiesPerWave = 5; // í•œ ë²ˆì— ìŠ¤í°í•  ìµœëŒ€ ì  ìˆ˜
-    public float difficultyMultiplier = 1f; // ë‚œì´ë„ ë°°ìˆ˜
+    [Header("Ãß°¡ ¼³Á¤")]
+    public int maxEnemiesPerWave = 5; // ÇÑ ¹ø¿¡ ½ºÆùÇÒ ÃÖ´ë Àû ¼ö
+    public float difficultyMultiplier = 1f; // ³­ÀÌµµ ¹è¼ö
 }

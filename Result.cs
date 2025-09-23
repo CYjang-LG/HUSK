@@ -3,7 +3,7 @@ using UnityEngine;
 public class Result : MonoBehaviour
 {
     public GameObject[] titles;
-    public GameObject stageCompletePanel; // ìŠ¤í…Œì´ì§€ í´ë¦¬ì–´ ì „ìš© íŒ¨ë„
+    public GameObject stageCompletePanel; // ½ºÅ×ÀÌÁö Å¬¸®¾î Àü¿ë ÆĞ³Î
 
     public void Lose()
     {
@@ -14,7 +14,7 @@ public class Result : MonoBehaviour
     {
         titles[1].SetActive(true);
 
-        // ìŠ¤í…Œì´ì§€ ë§¤ë‹ˆì €ì— ìŠ¹ë¦¬ ì•Œë¦¼
+        // ½ºÅ×ÀÌÁö ¸Å´ÏÀú¿¡ ½Â¸® ¾Ë¸²
         if (StageManager.instance != null)
         {
             StageManager.instance.OnGameVictory();
