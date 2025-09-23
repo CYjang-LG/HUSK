@@ -35,10 +35,10 @@ public class AchievementManager : MonoBehaviour
 
     void Start()
     {
-        UnlockCharacter(); // 오타 수정
+        UnlockCharacter();
     }
 
-    void UnlockCharacter() // 오타 수정
+    void UnlockCharacter()
     {
         for (int index = 0; index < lockCharacter.Length; index++)
         {
@@ -57,17 +57,19 @@ public class AchievementManager : MonoBehaviour
         }
     }
 
-    void CheckAchievement(Achievement achievement) // 오타 수정
+    void CheckAchievement(Achievement achievement)
     {
-        bool isAchieved = false; // 변수명 개선
+        bool isAchieved = false;
 
         switch (achievement)
         {
             case Achievement.UnlockPotato:
-                isAchieved = GameManager.instance.kill >= 10;
+                if (GameManager.instance != null)
+                    isAchieved = GameManager.instance.kill >= 10;
                 break;
             case Achievement.UnlockBean:
-                isAchieved = GameManager.instance.gameTime == GameManager.instance.maxGameTime;
+                if (GameManager.instance != null)
+                    isAchieved = GameManager.instance.gameTime >= GameManager.instance.maxGameTime;
                 break;
         }
 
@@ -75,21 +77,30 @@ public class AchievementManager : MonoBehaviour
         {
             PlayerPrefs.SetInt(achievement.ToString(), 1);
 
-            for (int index = 0; index < uiNotice.transform.childCount; index++)
+            if (uiNotice != null)
             {
-                bool isActive = index == (int)achievement;
-                uiNotice.transform.GetChild(index).gameObject.SetActive(isActive);
+                for (int index = 0; index < uiNotice.transform.childCount; index++)
+                {
+                    bool isActive = index == (int)achievement;
+                    uiNotice.transform.GetChild(index).gameObject.SetActive(isActive);
+                }
             }
 
-            StartCoroutine(NoticeRoutine()); // 오타 수정
+            StartCoroutine(NoticeRoutine());
         }
     }
 
-    IEnumerator NoticeRoutine() // 오타 수정
+    IEnumerator NoticeRoutine()
     {
-        uiNotice.SetActive(true);
-        AudioManager.instance.PlaySfx(AudioManager.Sfx.LevelUp);
+        if (uiNotice != null)
+            uiNotice.SetActive(true);
+        
+        if (AudioManager.instance != null)
+            AudioManager.instance.PlaySfx(AudioManager.Sfx.LevelUp);
+        
         yield return wait;
-        uiNotice.SetActive(false);
+        
+        if (uiNotice != null)
+            uiNotice.SetActive(false);
     }
 }
